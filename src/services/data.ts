@@ -18,6 +18,38 @@ export const ProjectDataFaker = () => {
   return data;
 };
 
+export const ProjectZonesDataFaker = () => {
+  const data: any = [];
+
+  for (let index = 0; index < 20; index++) {
+    data.push({
+      _id: faker.datatype.uuid(),
+      code: faker.random.numeric(10),
+      name: faker.finance.accountName(),
+      description: faker.company.catchPhraseNoun(),
+      boxs: faker.random.numeric(3),
+    });
+  }
+
+  return data;
+};
+
+export const ProjectZonesBoxesDataFaker = () => {
+  const data: any = [];
+
+  for (let index = 0; index < 20; index++) {
+    data.push({
+      _id: faker.datatype.uuid(),
+      code: faker.random.numeric(10),
+      zone: faker.finance.accountName(),
+      name: faker.finance.accountName(),
+      description: faker.company.catchPhraseNoun(),
+      items: faker.random.numeric(2),
+    });
+  }
+
+  return data;
+};
 
 export const UsersDataFaker = () => {
   const data: any = [];

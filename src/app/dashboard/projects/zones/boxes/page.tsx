@@ -18,7 +18,9 @@ import {
 import {
   faChartSimple,
   faUsers,
+  faArrowLeft,
   faBoxesStacked,
+  faRuler,
   faPenToSquare,
   faShield,
   faStoreSlash,
@@ -28,46 +30,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 
 import type { ColumnsType } from "antd/es/table";
-import { ProjectDataFaker } from "@/services/data";
+import { ProjectZonesBoxesDataFaker } from "@/services/data";
 import { useRouter } from "next/navigation";
 
 const { Paragraph } = Typography;
 
-const STATISTIC_ITEMS = [
-  {
-    name: "Projects",
-    value: 20,
-    precision: 0,
-    prefix: faChartSimple,
-    suffix: "%",
-    color: "#3f8600",
-  },
-  {
-    name: "Boxs",
-    value: 10000,
-    precision: 0,
-    prefix: faBoxesStacked,
-    suffix: "",
-    color: "#CDA434",
-  },
-  {
-    name: "Clients",
-    value: 100,
-    precision: 0,
-    prefix: faUsers,
-    suffix: "",
-    color: "#922B3E",
-  },
-];
-
 interface DataType {
   _id: string;
   code?: string;
-  project: string;
-  client: string;
-  boxcode: string;
-  date: string;
-  status: string;
+  zone: string;
+  name: string;
+  description: string;
+  items: string;
 }
 
 const colorsTags: any = {
@@ -131,47 +105,31 @@ export default function Home() {
       title: "# Code",
       dataIndex: "code",
       key: "code",
-      render: (text) => (
-        <Paragraph
-          copyable
-          onClick={() => router.push("/dashboard/projects/zones")}
-          style={{ cursor: "pointer" }}
-        >
-          {text.toString()}
-        </Paragraph>
-      ),
-    },
-    {
-      title: "Project",
-      dataIndex: "project",
-      key: "project",
-      render: (text) => (
-        <Paragraph
-          copyable
-          onClick={() => router.push("/dashboard/projects/zones")}
-          style={{ cursor: "pointer" }}
-        >
-          {text.toString()}
-        </Paragraph>
-      ),
-    },
-    {
-      title: "Client",
-      dataIndex: "client",
-      key: "client",
       render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
-      title: "Box Code",
-      dataIndex: "boxcode",
-      key: "boxcode",
+      title: "Zone",
+      dataIndex: "zone",
+      key: "zone",
       render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
-      title: "Status",
-      key: "status",
-      dataIndex: "status",
-      render: (text) => <Tag color={colorsTags[text]}>{text.toString()}</Tag>,
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      render: (text) => <Paragraph>{text.toString()}</Paragraph>,
+    },
+    {
+      title: "N° items",
+      dataIndex: "items",
+      key: "items",
+      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
       title: "Options",
@@ -186,22 +144,23 @@ export default function Home() {
     <main className={styles.main}>
       <Card
         bordered={false}
-        title="Projects"
+        title="Boxes"
         extra={
           <Space>
             <Button
-              type="primary"
+              type="ghost"
               icon={
                 <FontAwesomeIcon
-                  icon={faChartSimple}
+                  icon={faArrowLeft}
                   style={{ marginRight: 5 }}
                 />
               }
+              onClick={() => router.push("/dashboard/projects/zones")}
             >
-              New Project
+              Back to zones
             </Button>
             <Button
-              type="dashed"
+              type="primary"
               icon={
                 <FontAwesomeIcon
                   icon={faBoxesStacked}
@@ -211,6 +170,7 @@ export default function Home() {
             >
               New Box
             </Button>
+
             <Button
               type="ghost"
               loading={loading}
@@ -222,46 +182,29 @@ export default function Home() {
           </Space>
         }
       >
-        <div style={{ textAlign: "center", marginBottom: "3%" }}>
-          <Space size={100} align="center">
-            {STATISTIC_ITEMS.map((ele) => (
-              <Card bordered={false} key={ele.name}>
-                <Statistic
-                  title={ele.name}
-                  value={ele.value}
-                  precision={ele.precision}
-                  valueStyle={{ color: ele.color }}
-                  prefix={<FontAwesomeIcon icon={ele.prefix} />}
-                  suffix={ele.suffix}
-                />
-              </Card>
-            ))}
-          </Space>
-        </div>
-
         <Table
           rowKey="_id"
           loading={loading}
           columns={columns}
-          dataSource={ProjectDataFaker()}
+          dataSource={ProjectZonesBoxesDataFaker()}
           expandable={{
             expandedRowRender: (record) => (
               <section>
                 <Space size={100}>
-                  <Card title="Record">
+                  <Card title="Items">
                     <Timeline
                       items={[
                         {
-                          children: "Create a services site 2015-09-01",
+                          children: "Item 1, in zone 1",
                         },
                         {
-                          children: "Solve initial network problems 2015-09-01",
+                          children: "Item 2, in zone 1",
                         },
                         {
-                          children: "Technical testing 2015-09-01",
+                          children: "Item 3, in zone 1",
                         },
                         {
-                          children: "Network problems being solved 2015-09-01",
+                          children: "Item 4, in zone 1",
                         },
                       ]}
                     />
@@ -269,7 +212,7 @@ export default function Home() {
                   <Card title="Qr code of the box">
                     <QRCode
                       errorLevel="H"
-                      value={record.boxcode}
+                      value={record.items}
                       icon="https://i.pinimg.com/originals/77/44/80/7744806c7e15d502830a1fdd8e2a37e9.gif"
                     />
                   </Card>
