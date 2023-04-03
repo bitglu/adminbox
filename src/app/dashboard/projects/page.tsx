@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   Dropdown,
+  Image,
   MenuProps,
   QRCode,
   Space,
@@ -252,6 +253,29 @@ export default function Home() {
                       value={record.boxcode}
                       icon="https://i.pinimg.com/originals/77/44/80/7744806c7e15d502830a1fdd8e2a37e9.gif"
                     />
+                  </Card>
+                  <Card title="Image box">
+                    <Image.PreviewGroup
+                      preview={{
+                        onChange: (current, prev) =>
+                          console.log(
+                            `current index: ${current}, prev index: ${prev}`
+                          ),
+                      }}
+                    >
+                      <Image
+                        width={200}
+                        height={150}
+                        alt="Text AdminBox"
+                        src="https://www.latercera.com/resizer/SbYYoV02jTaqyeWEVBI0Fr9Ttwo=/900x600/smart/cloudfront-us-east-1.images.arcpublishing.com/copesa/NMBIFI2K2RAJTCEUWCW2HQVFIA.jpg"
+                      />
+                      <Image
+                        width={200}
+                        height={150}
+                        alt="Text AdminBox"
+                        src="https://www.revistainteriores.es/uploads/s1/79/35/27/istock-1016102754.jpeg"
+                      />
+                    </Image.PreviewGroup>
                   </Card>
                 </Space>
               </section>

@@ -4,7 +4,12 @@ const nextConfig = {
     appDir: true,
   },
   images: {
-    domains: ["i.pinimg.com", "softr-prod.imgix.net"],
+    domains: [
+      "i.pinimg.com",
+      "softr-prod.imgix.net",
+      "latercera.com",
+      "revistainteriores.es",
+    ],
   },
 };
 
