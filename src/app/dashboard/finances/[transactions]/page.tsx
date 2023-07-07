@@ -12,6 +12,7 @@ import {
   Input,
   MenuProps,
   QRCode,
+  Select,
   Space,
   Statistic,
   Table,
@@ -22,7 +23,9 @@ import {
 import {
   faChartSimple,
   faUsers,
+  faArrowLeft,
   faBoxesStacked,
+  faRuler,
   faPenToSquare,
   faShield,
   faStoreSlash,
@@ -32,16 +35,23 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useCallback, useEffect, useState } from "react";
 
 import type { ColumnsType } from "antd/es/table";
-import { ProjectDataFaker } from "@/services/data";
+import { ProjectZonesDataFaker } from "@/services/data";
 import { useRouter } from "next/navigation";
 
 const { Paragraph } = Typography;
 
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { ProvidersDatabase } from "@/services/supabase/schemas/providers.schema";
-type ProvidersDatabaseType =
-  ProvidersDatabase["public"]["Tables"]["providers"]["Row"];
+import { TransactionsDatabase } from "@/services/supabase/schemas/transactions.schema";
+import dayjs from "dayjs";
+type TransactionsDatabaseType =
+  TransactionsDatabase["public"]["Tables"]["transactions"]["Row"];
+
+const colorsTags: any = {
+  Pending: "cyan",
+  Delivery: "green",
+  Cancel: "red",
+};
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
   const [submittable, setSubmittable] = React.useState(false);
@@ -67,7 +77,7 @@ const SubmitButton = ({ form }: { form: FormInstance }) => {
   );
 };
 
-export default function Home() {
+export default function Home({ params }: { params: { transactions: string } }) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -76,9 +86,9 @@ export default function Home() {
 
   const [form] = Form.useForm();
 
-  const supabase = useSupabaseClient<ProvidersDatabaseType>();
+  const supabase = useSupabaseClient<TransactionsDatabase>();
 
-  const handleMenuClick = (e: any, record: ProvidersDatabaseType) => {
+  const handleMenuClick = (e: any, record: TransactionsDatabaseType) => {
     const status: any = {
       "1": "sdsd",
       "2": "StatusEnum.ACTIVE",
@@ -88,7 +98,7 @@ export default function Home() {
     //updateStatus(status[e?.key], record);
   };
 
-  const menuProps: any = (record: ProvidersDatabaseType) => ({
+  const menuProps: any = (record: TransactionsDatabaseType) => ({
     items,
     onClick: (e: MenuProps["onClick"]) => handleMenuClick(e, record),
   });
@@ -123,53 +133,55 @@ export default function Home() {
     },
   ];
 
-  const columns: ColumnsType<ProvidersDatabaseType> = [
+  const columns: ColumnsType<TransactionsDatabaseType> = [
     {
       title: "# Code",
       dataIndex: "id",
       key: "id",
       render: (text) => (
-        <Button
-          type="link"
-          onClick={() => router.push(`/dashboard/providers/${text}`)}
-          style={{ cursor: "pointer" }}
-        >
-          {text.toString()}
-        </Button>
-      ),
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: (text, record) => (
-        <Paragraph
-          copyable
-          onClick={() => router.push(`/dashboard/providers/${record.id}`)}
-          style={{ cursor: "pointer" }}
-        >
-          <Button type="link">{text.toString()}</Button>
+        <Paragraph copyable style={{ cursor: "pointer" }}>
+          {text?.toString()}
         </Paragraph>
       ),
     },
     {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-      render: (text, record) => (
-        <Paragraph
-          copyable
-          onClick={() => router.push(`/dashboard/providers/${record.id}`)}
-          style={{ cursor: "pointer" }}
-        >
-          {text.toString()}
+      title: "Provider ID",
+      dataIndex: "provider_id",
+      key: "provider_id",
+      render: (text) => (
+        <Paragraph copyable style={{ cursor: "pointer" }}>
+          {text?.toString()}
         </Paragraph>
+      ),
+    },
+    {
+      title: "type",
+      dataIndex: "type",
+      key: "type",
+      render: (text) => (
+        <Tag color={text === "Credit" ? "blue" : "purple"}>
+          {text?.toString()}
+        </Tag>
+      ),
+    },
+    {
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
+      render: (text) => <Tag color="green">{text?.toString()}</Tag>,
+    },
+    {
+      title: "Date",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (text) => (
+        <Paragraph copyable>{dayjs(text).format("DD MMM hh:mm a")}</Paragraph>
       ),
     },
     {
       title: "Options",
       key: "action",
-      render: (_, record: ProvidersDatabaseType) => (
+      render: (_, record: TransactionsDatabaseType) => (
         <Dropdown.Button menu={menuProps(record)}>Options</Dropdown.Button>
       ),
     },
@@ -179,14 +191,13 @@ export default function Home() {
     try {
       setLoading(true);
 
-      const { data: provider, error } = await supabase
-        .from("providers")
-        .insert({ ...values, type: "general" })
+      const { data: transaction, error } = await supabase
+        .from("transactions")
+        .insert({ ...values, provider_id: params.transactions })
         .select()
         .single();
 
       if (error) {
-        console.log("🚀 ~ file: page.tsx:189 ~ onFinish ~ error:", error);
         setLoading(false);
       } else {
         form.resetFields();
@@ -195,7 +206,6 @@ export default function Home() {
         getAllData();
       }
     } catch (error) {
-      console.log("🚀 ~ file: page.tsx:197 ~ onFinish ~ error:", error);
       console.log(error);
     }
   };
@@ -207,16 +217,16 @@ export default function Home() {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: providers, error } = await supabase
-        .from("providers")
+      const { data: users, error } = await supabase
+        .from("transactions")
         .select("*")
-        .eq("type", "general")
+        .eq("provider_id", params.transactions)
         .order("id", { ascending: false });
 
       setLoading(false);
       if (error) console.log("error", error);
       else {
-        setPayload(providers);
+        setPayload(users);
       }
     } catch (error) {
       setLoading(false);
@@ -233,26 +243,36 @@ export default function Home() {
     <main className={styles.main}>
       <Card
         bordered={false}
-        title="Providers"
+        title={`Finance ${params.transactions}`}
         extra={
           <Space>
             <Button
-              type="primary"
+              type="ghost"
               icon={
                 <FontAwesomeIcon
-                  icon={faChartSimple}
+                  icon={faArrowLeft}
                   style={{ marginRight: 5 }}
                 />
               }
+              onClick={() => router.push("/dashboard/finances")}
+            >
+              Back to finances
+            </Button>
+            <Button
+              type="primary"
+              icon={
+                <FontAwesomeIcon icon={faRuler} style={{ marginRight: 5 }} />
+              }
               onClick={() => setOpen(true)}
             >
-              New provider
+              New transaction
             </Button>
+
             <Button
               type="ghost"
               loading={loading}
               disabled={loading}
-              onClick={getAllData}
+              onClick={() => {}}
             >
               Refresh
             </Button>
@@ -268,7 +288,7 @@ export default function Home() {
       </Card>
 
       <Drawer
-        title="New provider"
+        title="New transaction"
         placement="right"
         onClose={() => setOpen(false)}
         open={open}
@@ -281,16 +301,16 @@ export default function Home() {
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
         >
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+          <Form.Item name="type" label="Type" rules={[{ required: true }]}>
+            <Select>
+              <Select.Option value="Credit">Credit</Select.Option>
+              <Select.Option value="Cash">Cash</Select.Option>
+            </Select>
+          </Form.Item>
+          <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item
-            name="description"
-            label="Description"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
+
           <Form.Item>
             <Space>
               <SubmitButton form={form} />

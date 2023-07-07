@@ -27,6 +27,7 @@ import {
   faShield,
   faStoreSlash,
   faTrash,
+  faMoneyBill,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useCallback, useEffect, useState } from "react";
@@ -131,7 +132,7 @@ export default function Home() {
       render: (text) => (
         <Button
           type="link"
-          onClick={() => router.push(`/dashboard/providers/${text}`)}
+          onClick={() => router.push(`/dashboard/finances/${text}`)}
           style={{ cursor: "pointer" }}
         >
           {text.toString()}
@@ -145,7 +146,7 @@ export default function Home() {
       render: (text, record) => (
         <Paragraph
           copyable
-          onClick={() => router.push(`/dashboard/providers/${record.id}`)}
+          onClick={() => router.push(`/dashboard/finances/${record.id}`)}
           style={{ cursor: "pointer" }}
         >
           <Button type="link">{text.toString()}</Button>
@@ -159,7 +160,7 @@ export default function Home() {
       render: (text, record) => (
         <Paragraph
           copyable
-          onClick={() => router.push(`/dashboard/providers/${record.id}`)}
+          onClick={() => router.push(`/dashboard/finances/${record.id}`)}
           style={{ cursor: "pointer" }}
         >
           {text.toString()}
@@ -181,7 +182,7 @@ export default function Home() {
 
       const { data: provider, error } = await supabase
         .from("providers")
-        .insert({ ...values, type: "general" })
+        .insert({ ...values, type: "finances" })
         .select()
         .single();
 
@@ -210,7 +211,7 @@ export default function Home() {
       const { data: providers, error } = await supabase
         .from("providers")
         .select("*")
-        .eq("type", "general")
+        .eq("type", "finances")
         .order("id", { ascending: false });
 
       setLoading(false);
@@ -240,13 +241,13 @@ export default function Home() {
               type="primary"
               icon={
                 <FontAwesomeIcon
-                  icon={faChartSimple}
+                  icon={faMoneyBill}
                   style={{ marginRight: 5 }}
                 />
               }
               onClick={() => setOpen(true)}
             >
-              New provider
+              New finance
             </Button>
             <Button
               type="ghost"

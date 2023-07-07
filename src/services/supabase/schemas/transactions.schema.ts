@@ -6,28 +6,28 @@ export type Json =
   | { [key: string]: Json }
   | Json[];
 
-export interface ProvidersDatabase {
+export interface TransactionsDatabase {
   public: {
     Tables: {
-      providers: {
+      transactions: {
         Row: {
           id: number;
           created_at: string;
-          email: string;
-          name: string;
+          provider_id: string;
           type: string;
+          amount: string;
         };
         Insert: {
-          email: string;
-          name: string;
+          provider_id: string;
           type: string;
+          amount: string;
         };
         Update: {
           id: number;
           created_at: string;
-          email: string;
-          name: string;
+          provider_id: string;
           type: string;
+          amount: string;
         };
       };
     };

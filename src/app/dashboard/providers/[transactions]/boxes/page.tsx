@@ -30,7 +30,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 
 import type { ColumnsType } from "antd/es/table";
-import { ProjectZonesDataFaker } from "@/services/data";
+import { ProjectZonesBoxesDataFaker } from "@/services/data";
 import { useRouter } from "next/navigation";
 
 const { Paragraph } = Typography;
@@ -38,9 +38,10 @@ const { Paragraph } = Typography;
 interface DataType {
   _id: string;
   code?: string;
+  zone: string;
   name: string;
   description: string;
-  boxs: string;
+  items: string;
 }
 
 const colorsTags: any = {
@@ -104,29 +105,19 @@ export default function Home() {
       title: "# Code",
       dataIndex: "code",
       key: "code",
-      render: (text) => (
-        <Paragraph
-          copyable
-          onClick={() => router.push("/dashboard/projects/zones/boxes")}
-          style={{ cursor: "pointer" }}
-        >
-          {text.toString()}
-        </Paragraph>
-      ),
+      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
+    },
+    {
+      title: "Zone",
+      dataIndex: "zone",
+      key: "zone",
+      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text) => (
-        <Paragraph
-          copyable
-          onClick={() => router.push("/dashboard/projects/zones/boxes")}
-          style={{ cursor: "pointer" }}
-        >
-          {text.toString()}
-        </Paragraph>
-      ),
+      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
       title: "Description",
@@ -135,9 +126,9 @@ export default function Home() {
       render: (text) => <Paragraph>{text.toString()}</Paragraph>,
     },
     {
-      title: "N° Boxs",
-      dataIndex: "boxs",
-      key: "boxs",
+      title: "N° items",
+      dataIndex: "items",
+      key: "items",
       render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
@@ -153,7 +144,7 @@ export default function Home() {
     <main className={styles.main}>
       <Card
         bordered={false}
-        title="Zones"
+        title="Boxes"
         extra={
           <Space>
             <Button
@@ -164,20 +155,12 @@ export default function Home() {
                   style={{ marginRight: 5 }}
                 />
               }
-              onClick={() => router.push("/dashboard/projects")}
+              onClick={() => router.push("/dashboard/projects/zones")}
             >
-              Back to projects
+              Back to zones
             </Button>
             <Button
               type="primary"
-              icon={
-                <FontAwesomeIcon icon={faRuler} style={{ marginRight: 5 }} />
-              }
-            >
-              New Zone
-            </Button>
-            <Button
-              type="dashed"
               icon={
                 <FontAwesomeIcon
                   icon={faBoxesStacked}
@@ -203,7 +186,63 @@ export default function Home() {
           rowKey="_id"
           loading={loading}
           columns={columns}
-          dataSource={ProjectZonesDataFaker()}
+          dataSource={ProjectZonesBoxesDataFaker()}
+          expandable={{
+            expandedRowRender: (record) => (
+              <section>
+                <Space size={100}>
+                  <Card title="Items">
+                    <Timeline
+                      items={[
+                        {
+                          children: "Item 1, in zone 1",
+                        },
+                        {
+                          children: "Item 2, in zone 1",
+                        },
+                        {
+                          children: "Item 3, in zone 1",
+                        },
+                        {
+                          children: "Item 4, in zone 1",
+                        },
+                      ]}
+                    />
+                  </Card>
+                  <Card title="Qr code of the box">
+                    <QRCode
+                      errorLevel="H"
+                      value={record.items}
+                      icon="https://i.pinimg.com/originals/77/44/80/7744806c7e15d502830a1fdd8e2a37e9.gif"
+                    />
+                  </Card>
+                  <Card title="Image box">
+                    <Image.PreviewGroup
+                      preview={{
+                        onChange: (current, prev) =>
+                          console.log(
+                            `current index: ${current}, prev index: ${prev}`
+                          ),
+                      }}
+                    >
+                      <Image
+                        width={200}
+                        height={150}
+                        alt="Text AdminBox"
+                        src="https://www.latercera.com/resizer/SbYYoV02jTaqyeWEVBI0Fr9Ttwo=/900x600/smart/cloudfront-us-east-1.images.arcpublishing.com/copesa/NMBIFI2K2RAJTCEUWCW2HQVFIA.jpg"
+                      />
+                      <Image
+                        width={200}
+                        height={150}
+                        alt="Text AdminBox"
+                        src="https://www.revistainteriores.es/uploads/s1/79/35/27/istock-1016102754.jpeg"
+                      />
+                    </Image.PreviewGroup>
+                  </Card>
+                </Space>
+              </section>
+            ),
+          }}
         />
       </Card>
     </main>
