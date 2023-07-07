@@ -8,6 +8,7 @@ import {
   Dropdown,
   Form,
   FormInstance,
+  Image,
   Input,
   MenuProps,
   QRCode,
@@ -31,28 +32,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useCallback, useEffect, useState } from "react";
 
 import type { ColumnsType } from "antd/es/table";
-import { UsersDataFaker } from "@/services/data";
-
-/* SUPABASE */
-import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { UsersDatabase } from "@/services/supabase/schemas/users.schema";
-type UsersDatabaseType = UsersDatabase["public"]["Tables"]["users"]["Row"];
+import { ProjectDataFaker } from "@/services/data";
+import { useRouter } from "next/navigation";
 
 const { Paragraph } = Typography;
 
-interface DataType {
-  _id: string;
-  code?: string;
-  name: string;
-  email: string;
-  rol: string;
-}
-
-const colorsTags: any = {
-  User: "cyan",
-  Admin: "green",
-  Packer: "red",
-};
+/* SUPABASE */
+import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { ProvidersDatabase } from "@/services/supabase/schemas/providers.schema";
+type ProvidersDatabaseType =
+  ProvidersDatabase["public"]["Tables"]["providers"]["Row"];
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
   const [submittable, setSubmittable] = React.useState(false);
@@ -79,15 +68,17 @@ const SubmitButton = ({ form }: { form: FormInstance }) => {
 };
 
 export default function Home() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState<any>([]);
   const [open, setOpen] = useState(false);
 
   const [form] = Form.useForm();
 
-  const supabase = useSupabaseClient<UsersDatabaseType>();
+  const supabase = useSupabaseClient<ProvidersDatabaseType>();
 
-  const handleMenuClick = (e: any, record: DataType) => {
+  const handleMenuClick = (e: any, record: ProvidersDatabaseType) => {
     const status: any = {
       "1": "sdsd",
       "2": "StatusEnum.ACTIVE",
@@ -97,7 +88,7 @@ export default function Home() {
     //updateStatus(status[e?.key], record);
   };
 
-  const menuProps: any = (record: DataType) => ({
+  const menuProps: any = (record: ProvidersDatabaseType) => ({
     items,
     onClick: (e: MenuProps["onClick"]) => handleMenuClick(e, record),
   });
@@ -132,35 +123,53 @@ export default function Home() {
     },
   ];
 
-  const columns: ColumnsType<DataType> = [
+  const columns: ColumnsType<ProvidersDatabaseType> = [
     {
       title: "# Code",
       dataIndex: "id",
       key: "id",
-      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
+      render: (text) => (
+        <Paragraph
+          copyable
+          onClick={() => router.push("/dashboard/providers/transactions")}
+          style={{ cursor: "pointer" }}
+        >
+          {text.toString()}
+        </Paragraph>
+      ),
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
+      render: (text) => (
+        <Paragraph
+          copyable
+          onClick={() => router.push("/dashboard/providers/transactions")}
+          style={{ cursor: "pointer" }}
+        >
+          {text.toString()}
+        </Paragraph>
+      ),
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
-    },
-    {
-      title: "Created",
-      key: "created_at",
-      dataIndex: "created_at",
-      render: (text) => <Tag color={colorsTags[text]}>{text.toString()}</Tag>,
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      render: (text) => (
+        <Paragraph
+          copyable
+          onClick={() => router.push("/dashboard/providers/transactions")}
+          style={{ cursor: "pointer" }}
+        >
+          {text.toString()}
+        </Paragraph>
+      ),
     },
     {
       title: "Options",
       key: "action",
-      render: (_, record: DataType) => (
+      render: (_, record: ProvidersDatabaseType) => (
         <Dropdown.Button menu={menuProps(record)}>Options</Dropdown.Button>
       ),
     },
@@ -170,13 +179,14 @@ export default function Home() {
     try {
       setLoading(true);
 
-      const { data: user, error } = await supabase
-        .from("users")
-        .insert(values)
+      const { data: provider, error } = await supabase
+        .from("providers")
+        .insert({ ...values, type: "general" })
         .select()
         .single();
 
       if (error) {
+        console.log("🚀 ~ file: page.tsx:189 ~ onFinish ~ error:", error);
         setLoading(false);
       } else {
         form.resetFields();
@@ -185,6 +195,7 @@ export default function Home() {
         getAllData();
       }
     } catch (error) {
+      console.log("🚀 ~ file: page.tsx:197 ~ onFinish ~ error:", error);
       console.log(error);
     }
   };
@@ -196,15 +207,16 @@ export default function Home() {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: users, error } = await supabase
-        .from("users")
+      const { data: providers, error } = await supabase
+        .from("providers")
         .select("*")
+        .eq("type", "general")
         .order("id", { ascending: false });
 
       setLoading(false);
       if (error) console.log("error", error);
       else {
-        setPayload(users);
+        setPayload(providers);
       }
     } catch (error) {
       setLoading(false);
@@ -221,19 +233,31 @@ export default function Home() {
     <main className={styles.main}>
       <Card
         bordered={false}
-        title="Users"
+        title="Providers"
         extra={
           <Space>
             <Button
               type="primary"
-              loading={loading}
-              disabled={loading}
               icon={
-                <FontAwesomeIcon icon={faUsers} style={{ marginRight: 5 }} />
+                <FontAwesomeIcon
+                  icon={faChartSimple}
+                  style={{ marginRight: 5 }}
+                />
               }
               onClick={() => setOpen(true)}
             >
-              New User
+              New provider
+            </Button>
+            <Button
+              type="dashed"
+              icon={
+                <FontAwesomeIcon
+                  icon={faBoxesStacked}
+                  style={{ marginRight: 5 }}
+                />
+              }
+            >
+              New Box
             </Button>
             <Button
               type="ghost"
@@ -255,7 +279,7 @@ export default function Home() {
       </Card>
 
       <Drawer
-        title="New User"
+        title="New provider"
         placement="right"
         onClose={() => setOpen(false)}
         open={open}
@@ -271,12 +295,9 @@ export default function Home() {
           <Form.Item name="name" label="Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
           <Form.Item
-            name="password"
-            label="Password"
+            name="description"
+            label="Description"
             rules={[{ required: true }]}
           >
             <Input />

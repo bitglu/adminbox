@@ -12,6 +12,8 @@ import SidebarComponent from "@/components/layouts/SidebarComponent";
 import ContentComponent from "@/components/layouts/ContentComponent";
 
 import { config } from "@fortawesome/fontawesome-svg-core";
+import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import { supabase } from "@/services/supabase/supabase";
 config.autoAddCss = false;
 
 export default function RootLayout({
@@ -20,21 +22,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head />
-      <body>
-        <ConfigProvider
-          locale={esEs}
-          theme={{
-            token: TokenDesign.token,
-          }}
-        >
-          <Layout>
-            <SidebarComponent />
-            <ContentComponent>{children}</ContentComponent>
-          </Layout>
-        </ConfigProvider>
-      </body>
-    </html>
+    <SessionContextProvider supabaseClient={supabase}>
+      <html lang="en">
+        <head />
+        <body>
+          <ConfigProvider
+            locale={esEs}
+            theme={{
+              token: TokenDesign.token,
+            }}
+          >
+            <Layout>
+              <SidebarComponent />
+              <ContentComponent>{children}</ContentComponent>
+            </Layout>
+          </ConfigProvider>
+        </body>
+      </html>
+    </SessionContextProvider>
   );
 }

@@ -7,6 +7,6 @@ import {
 
 export const MENU_ITEMS_ADMIN_VM: any = [
   { label: "Home", icon: faHouse, key: "/" },
-  { label: "Projects", icon: faDiagramProject, key: "/projects" },
+  { label: "Providers", icon: faDiagramProject, key: "/providers" },
   { label: "Users", icon: faUsers, key: "/users" },
 ];
