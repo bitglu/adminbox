@@ -311,11 +311,15 @@ export default function Home({ params }: { params: { transactions: string } }) {
               title="Total Credit"
               value={creditAmount}
               style={{ marginLeft: 10, marginRight: 10 }}
+              valueStyle={{ color: "#1662DC" }}
+              suffix="$"
             />
             <Statistic
               title="Total Cash"
               value={cashAmount}
               style={{ marginLeft: 10, marginRight: 10 }}
+              valueStyle={{ color: "#531DAB" }}
+              suffix="$"
             />
           </Space>,
         ]}
