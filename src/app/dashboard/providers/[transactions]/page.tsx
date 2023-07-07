@@ -84,6 +84,9 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const [payload, setPayload] = useState<any>([]);
   const [open, setOpen] = useState(false);
 
+  const [creditAmount, setCreditAmount] = useState(0);
+  const [cashAmount, setCashAmount] = useState(0);
+
   const [form] = Form.useForm();
 
   const supabase = useSupabaseClient<TransactionsDatabase>();
@@ -228,6 +231,27 @@ export default function Home({ params }: { params: { transactions: string } }) {
       setLoading(false);
       if (error) console.log("error", error);
       else {
+        setCreditAmount(
+          users
+            .map((ele) => {
+              if (ele.type === "Credit") {
+                return ele.amount;
+              }
+            })
+            .filter((ele) => ele)
+            .reduce((ele, a: any) => ele + a, 0)
+        );
+        setCashAmount(
+          users
+            .map((ele) => {
+              if (ele.type === "Cash") {
+                return ele.amount;
+              }
+            })
+            .filter((ele) => ele)
+            .reduce((ele, a: any) => ele + a, 0)
+        );
+
         setPayload(users);
       }
     } catch (error) {
@@ -260,6 +284,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
             >
               Back to providers
             </Button>
+
             <Button
               type="primary"
               icon={
@@ -280,6 +305,20 @@ export default function Home({ params }: { params: { transactions: string } }) {
             </Button>
           </Space>
         }
+        actions={[
+          <Space key={1}>
+            <Statistic
+              title="Total Credit"
+              value={creditAmount}
+              style={{ marginLeft: 10, marginRight: 10 }}
+            />
+            <Statistic
+              title="Total Cash"
+              value={cashAmount}
+              style={{ marginLeft: 10, marginRight: 10 }}
+            />
+          </Space>,
+        ]}
       >
         <Table
           rowKey="id"
