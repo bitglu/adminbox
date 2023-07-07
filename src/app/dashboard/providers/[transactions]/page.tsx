@@ -312,14 +312,14 @@ export default function Home({ params }: { params: { transactions: string } }) {
               value={creditAmount}
               style={{ marginLeft: 10, marginRight: 10 }}
               valueStyle={{ color: "#1662DC" }}
-              suffix="$"
+              prefix="$"
             />
             <Statistic
               title="Total Cash"
               value={cashAmount}
               style={{ marginLeft: 10, marginRight: 10 }}
               valueStyle={{ color: "#531DAB" }}
-              suffix="$"
+              prefix="$"
             />
           </Space>,
         ]}
