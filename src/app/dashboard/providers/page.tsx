@@ -10,6 +10,7 @@ import {
   FormInstance,
   Image,
   Input,
+  InputRef,
   MenuProps,
   QRCode,
   Space,
@@ -27,11 +28,12 @@ import {
   faShield,
   faStoreSlash,
   faTrash,
+  faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnType, ColumnsType, TableProps } from "antd/es/table";
 import { ProjectDataFaker } from "@/services/data";
 import { useRouter } from "next/navigation";
 
@@ -40,6 +42,7 @@ const { Paragraph } = Typography;
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { ProvidersDatabase } from "@/services/supabase/schemas/providers.schema";
+import { FilterConfirmProps } from "antd/es/table/interface";
 type ProvidersDatabaseType =
   ProvidersDatabase["public"]["Tables"]["providers"]["Row"];
 
@@ -77,6 +80,16 @@ export default function Home() {
   const [form] = Form.useForm();
 
   const supabase = useSupabaseClient<ProvidersDatabaseType>();
+
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef<InputRef>(null);
+
+  const [paramsFilters, setParamsFilters] = useState<any>({
+    id: null,
+    name: null,
+    description: null,
+  });
 
   const handleMenuClick = (e: any, record: ProvidersDatabaseType) => {
     const status: any = {
@@ -123,11 +136,132 @@ export default function Home() {
     },
   ];
 
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: (param?: FilterConfirmProps) => void,
+    dataIndex: string
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+
+  const handleReset = (
+    clearFilters: () => void,
+    confirm: (param?: FilterConfirmProps) => void,
+    dataIndex: string
+  ) => {
+    clearFilters();
+    setSearchText("");
+    setParamsFilters({
+      ...paramsFilters,
+      [dataIndex]: null,
+    });
+    confirm();
+  };
+
+  const onChangeTable: TableProps<any>["onChange"] = (
+    pagination,
+    filters: any,
+    sorter,
+    extra
+  ) => {
+    if (filters.id) {
+      setParamsFilters({
+        ...paramsFilters,
+        id: filters.id[0],
+      });
+    }
+
+    if (filters.name) {
+      setParamsFilters({
+        ...paramsFilters,
+        name: filters.name[0],
+      });
+    }
+
+    if (filters.description) {
+      setParamsFilters({
+        ...paramsFilters,
+        description: filters.description[0],
+      });
+    }
+  };
+
+  const getColumnSearchProps = (dataIndex: string): ColumnType<any> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }: any) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search`}
+          value={selectedKeys[0]}
+          onChange={(e: any) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() =>
+            handleSearch(selectedKeys as string[], confirm, dataIndex)
+          }
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
+            icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() =>
+              clearFilters && handleReset(clearFilters, confirm, dataIndex)
+            }
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <FontAwesomeIcon
+        icon={faMagnifyingGlass}
+        style={{ color: filtered ? "#512A8A" : undefined }}
+      />
+    ),
+    onFilterDropdownOpenChange: (visible: any) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+  });
+
   const columns: ColumnsType<ProvidersDatabaseType> = [
     {
       title: "# Code",
       dataIndex: "id",
       key: "id",
+      ...getColumnSearchProps("id"),
       render: (text) => (
         <Button
           type="link"
@@ -142,6 +276,7 @@ export default function Home() {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      ...getColumnSearchProps("name"),
       render: (text, record) => (
         <Paragraph
           copyable
@@ -156,6 +291,7 @@ export default function Home() {
       title: "Description",
       dataIndex: "description",
       key: "description",
+      ...getColumnSearchProps("description"),
       render: (text, record) => (
         <Paragraph
           copyable
@@ -207,11 +343,26 @@ export default function Home() {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: providers, error } = await supabase
+      const query = supabase
         .from("providers")
         .select("*")
-        .eq("type", "general")
-        .order("id", { ascending: false });
+        .eq("type", "general");
+
+      if (paramsFilters.description) {
+        query.ilike("description", `%${paramsFilters.description}%`);
+      }
+
+      if (paramsFilters.name) {
+        query.ilike("name", `%${paramsFilters.name}%`);
+      }
+
+      if (paramsFilters.id) {
+        query.eq("id", paramsFilters.id);
+      }
+
+      const { data: providers, error } = await query.order("id", {
+        ascending: false,
+      });
 
       setLoading(false);
       if (error) console.log("error", error);
@@ -221,7 +372,7 @@ export default function Home() {
     } catch (error) {
       setLoading(false);
     }
-  }, []);
+  }, [paramsFilters]);
 
   useEffect(() => {
     getAllData();
@@ -264,6 +415,7 @@ export default function Home() {
           loading={loading}
           columns={columns}
           dataSource={payload}
+          onChange={onChangeTable}
         />
       </Card>
 

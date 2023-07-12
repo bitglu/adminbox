@@ -4,12 +4,14 @@ import styles from "./page.module.css";
 import {
   Button,
   Card,
+  DatePicker,
   Drawer,
   Dropdown,
   Form,
   FormInstance,
   Image,
   Input,
+  InputRef,
   MenuProps,
   QRCode,
   Select,
@@ -30,11 +32,13 @@ import {
   faShield,
   faStoreSlash,
   faTrash,
+  faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useCallback, useEffect, useState } from "react";
 
-import type { ColumnsType } from "antd/es/table";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import type { ColumnType, ColumnsType, TableProps } from "antd/es/table";
 import { ProjectZonesDataFaker } from "@/services/data";
 import { useRouter } from "next/navigation";
 
@@ -44,6 +48,7 @@ const { Paragraph } = Typography;
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { TransactionsDatabase } from "@/services/supabase/schemas/transactions.schema";
 import dayjs from "dayjs";
+import { FilterConfirmProps } from "antd/es/table/interface";
 type TransactionsDatabaseType =
   TransactionsDatabase["public"]["Tables"]["transactions"]["Row"];
 
@@ -52,6 +57,8 @@ const colorsTags: any = {
   Delivery: "green",
   Cancel: "red",
 };
+
+const { RangePicker } = DatePicker;
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
   const [submittable, setSubmittable] = React.useState(false);
@@ -88,6 +95,19 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const [cashAmount, setCashAmount] = useState(0);
 
   const [form] = Form.useForm();
+
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef<InputRef>(null);
+
+  const [paramsFilters, setParamsFilters] = useState<any>({
+    id: null,
+    type: null,
+    date: null,
+    code: null,
+    from: null,
+    to: null,
+  });
 
   const supabase = useSupabaseClient<TransactionsDatabase>();
 
@@ -136,11 +156,132 @@ export default function Home({ params }: { params: { transactions: string } }) {
     },
   ];
 
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: (param?: FilterConfirmProps) => void,
+    dataIndex: string
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+
+  const handleReset = (
+    clearFilters: () => void,
+    confirm: (param?: FilterConfirmProps) => void,
+    dataIndex: string
+  ) => {
+    clearFilters();
+    setSearchText("");
+    setParamsFilters({
+      ...paramsFilters,
+      [dataIndex]: null,
+    });
+    confirm();
+  };
+
+  const getColumnSearchProps = (dataIndex: string): ColumnType<any> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }: any) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search`}
+          value={selectedKeys[0]}
+          onChange={(e: any) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() =>
+            handleSearch(selectedKeys as string[], confirm, dataIndex)
+          }
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
+            icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() =>
+              clearFilters && handleReset(clearFilters, confirm, dataIndex)
+            }
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <FontAwesomeIcon
+        icon={faMagnifyingGlass}
+        style={{ color: filtered ? "#512A8A" : undefined }}
+      />
+    ),
+    onFilterDropdownOpenChange: (visible: any) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+  });
+
+  const onChangeTable: TableProps<any>["onChange"] = (
+    pagination,
+    filters: any,
+    sorter,
+    extra
+  ) => {
+    if (filters.id) {
+      setParamsFilters({
+        ...paramsFilters,
+        id: filters.id[0],
+      });
+    }
+
+    if (filters.type) {
+      setParamsFilters({
+        ...paramsFilters,
+        type: filters.type[0],
+      });
+    }
+
+    if (paramsFilters.type && !filters.type) {
+      setParamsFilters({
+        ...paramsFilters,
+        type: null,
+      });
+    }
+  };
+
   const columns: ColumnsType<TransactionsDatabaseType> = [
     {
       title: "# Code",
       dataIndex: "id",
       key: "id",
+      ...getColumnSearchProps("id"),
       render: (text) => (
         <Paragraph copyable style={{ cursor: "pointer" }}>
           {text?.toString()}
@@ -161,6 +302,17 @@ export default function Home({ params }: { params: { transactions: string } }) {
       title: "type",
       dataIndex: "type",
       key: "type",
+      filterMultiple: false,
+      filters: [
+        {
+          text: "Cash",
+          value: "Cash",
+        },
+        {
+          text: "Credit",
+          value: "Credit",
+        },
+      ],
       render: (text) => (
         <Tag color={text === "Credit" ? "blue" : "purple"}>
           {text?.toString()}
@@ -179,6 +331,26 @@ export default function Home({ params }: { params: { transactions: string } }) {
       key: "created_at",
       render: (text) => (
         <Paragraph copyable>{dayjs(text).format("DD MMM hh:mm a")}</Paragraph>
+      ),
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        close,
+      }: any) => (
+        <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+          <RangePicker
+            onChange={(date, dateString) => {
+              setParamsFilters({
+                ...paramsFilters,
+                from: dateString[0],
+                to: dateString[1],
+              });
+            }}
+          />
+          <br />
+        </div>
       ),
     },
     {
@@ -222,11 +394,35 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: users, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("provider_id", params.transactions)
-        .order("id", { ascending: false });
+      const query = supabase.from("transactions").select("*");
+
+      if (params.transactions) {
+        query.eq("provider_id", params.transactions);
+      }
+
+      if (paramsFilters.type) {
+        query.eq("type", paramsFilters.type);
+      }
+
+      if (paramsFilters.from || paramsFilters.to) {
+        query
+          .gt(
+            "created_at",
+            dayjs(paramsFilters.from).startOf("day").format("YYYY-MM-DD hh:mm:ss")
+          )
+          .lt(
+            "created_at",
+            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD hh:mm:ss")
+          );
+      }
+
+      if (paramsFilters.id) {
+        query.eq("id", paramsFilters.id);
+      }
+
+      const { data: users, error } = await query.order("id", {
+        ascending: false,
+      });
 
       setLoading(false);
       if (error) console.log("error", error);
@@ -257,7 +453,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
     } catch (error) {
       setLoading(false);
     }
-  }, []);
+  }, [paramsFilters]);
 
   useEffect(() => {
     getAllData();
@@ -329,6 +525,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
           loading={loading}
           columns={columns}
           dataSource={payload}
+          onChange={onChangeTable}
         />
       </Card>
 
