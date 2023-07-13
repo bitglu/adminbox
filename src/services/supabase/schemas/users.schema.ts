@@ -14,6 +14,7 @@ export interface UsersDatabase {
           id: number;
           created_at: string;
           email: string;
+          status: string;
           name: string;
           password: string;
         };
@@ -28,6 +29,16 @@ export interface UsersDatabase {
           email: string;
           name: string;
           password: string;
+          status: string;
+        };
+
+        Delete: {
+          id: number;
+          created_at: string;
+          email: string;
+          name: string;
+          password: string;
+          status: string;
         };
       };
     };

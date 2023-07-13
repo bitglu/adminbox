@@ -12,6 +12,7 @@ import {
   Input,
   InputRef,
   MenuProps,
+  Popconfirm,
   QRCode,
   Space,
   Statistic,
@@ -19,6 +20,7 @@ import {
   Tag,
   Timeline,
   Typography,
+  message,
 } from "antd";
 import {
   faChartSimple,
@@ -48,6 +50,7 @@ const { RangePicker } = DatePicker;
 
 interface DataType {
   _id: string;
+  id: string;
   code?: string;
   name: string;
   email: string;
@@ -90,6 +93,7 @@ export default function Home() {
   const [open, setOpen] = useState(false);
 
   const [form] = Form.useForm();
+  const [typeForm, setTypeForm] = useState<any>(null);
 
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -102,6 +106,8 @@ export default function Home() {
     from: null,
     to: null,
   });
+
+  const [messageApi, contextHolder] = message.useMessage();
 
   const supabase = useSupabaseClient<UsersDatabaseType>();
 
@@ -324,7 +330,33 @@ export default function Home() {
       title: "Options",
       key: "action",
       render: (_, record: DataType) => (
-        <Dropdown.Button menu={menuProps(record)}>Options</Dropdown.Button>
+        <Space>
+          <Button
+            type="dashed"
+            size="small"
+            onClick={() => {
+              form.setFieldsValue({
+                name: record.name,
+                email: record.email,
+              });
+              setTypeForm(record.id);
+              setOpen(true);
+            }}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Delete?"
+            description="Are you sure to delete this?"
+            onConfirm={() => confirmDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button danger size="small">
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -333,22 +365,55 @@ export default function Home() {
     try {
       setLoading(true);
 
-      const { data: user, error } = await supabase
-        .from("users")
-        .insert(values)
-        .select()
-        .single();
+      if (typeForm) {
+        const { error } = await supabase
+          .from("users")
+          .update(values)
+          .eq("id", typeForm);
 
-      if (error) {
-        setLoading(false);
-      } else {
+        messageApi.open({
+          type: "success",
+          content: "Updated completed",
+        });
         form.resetFields();
-        setOpen(false);
         setLoading(false);
+        setOpen(false);
         getAllData();
+      } else {
+        const { data: user, error } = await supabase
+          .from("users")
+          .insert(values)
+          .select()
+          .single();
+        if (error) {
+          setLoading(false);
+        } else {
+          form.resetFields();
+          setOpen(false);
+          setLoading(false);
+          getAllData();
+        }
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const confirmDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ status: "deleted" })
+        .eq("id", id);
+
+      messageApi.open({
+        type: "success",
+        content: "deletion completed",
+      });
+
+      getAllData();
+    } catch (error) {
+      console.log("🚀 ~ file: page.tsx:378 ~ confirmDelete ~ error:", error);
     }
   };
 
@@ -359,7 +424,7 @@ export default function Home() {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const query = supabase.from("users").select("*");
+      const query = supabase.from("users").select("*").eq("status", "active");
 
       if (paramsFilters.email) {
         query.ilike("email", `%${paramsFilters.email}%`);
@@ -409,6 +474,8 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
+      {contextHolder}
+
       <Card
         bordered={false}
         title="Users"
@@ -446,7 +513,7 @@ export default function Home() {
       </Card>
 
       <Drawer
-        title="New User"
+        title={typeForm ? "Edit user" : "New user"}
         placement="right"
         onClose={() => setOpen(false)}
         open={open}
@@ -465,13 +532,16 @@ export default function Home() {
           <Form.Item name="email" label="Email" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
+
+          {!typeForm && (
+            <Form.Item
+              name="password"
+              label="Password"
+              rules={[{ required: true }]}
+            >
+              <Input />
+            </Form.Item>
+          )}
           <Form.Item>
             <Space>
               <SubmitButton form={form} />
