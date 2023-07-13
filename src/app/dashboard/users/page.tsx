@@ -4,11 +4,13 @@ import styles from "./page.module.css";
 import {
   Button,
   Card,
+  DatePicker,
   Drawer,
   Dropdown,
   Form,
   FormInstance,
   Input,
+  InputRef,
   MenuProps,
   QRCode,
   Space,
@@ -26,19 +28,23 @@ import {
   faShield,
   faStoreSlash,
   faTrash,
+  faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import type { ColumnsType } from "antd/es/table";
+import type { ColumnType, ColumnsType, TableProps } from "antd/es/table";
 import { UsersDataFaker } from "@/services/data";
 
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { UsersDatabase } from "@/services/supabase/schemas/users.schema";
 type UsersDatabaseType = UsersDatabase["public"]["Tables"]["users"]["Row"];
+import dayjs from "dayjs";
+import { FilterConfirmProps } from "antd/es/table/interface";
 
 const { Paragraph } = Typography;
+const { RangePicker } = DatePicker;
 
 interface DataType {
   _id: string;
@@ -84,6 +90,18 @@ export default function Home() {
   const [open, setOpen] = useState(false);
 
   const [form] = Form.useForm();
+
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef<InputRef>(null);
+
+  const [paramsFilters, setParamsFilters] = useState<any>({
+    id: null,
+    name: null,
+    email: null,
+    from: null,
+    to: null,
+  });
 
   const supabase = useSupabaseClient<UsersDatabaseType>();
 
@@ -132,30 +150,175 @@ export default function Home() {
     },
   ];
 
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: (param?: FilterConfirmProps) => void,
+    dataIndex: string
+  ) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+
+  const handleReset = (
+    clearFilters: () => void,
+    confirm: (param?: FilterConfirmProps) => void,
+    dataIndex: string
+  ) => {
+    clearFilters();
+    setSearchText("");
+    setParamsFilters({
+      ...paramsFilters,
+      [dataIndex]: null,
+    });
+    confirm();
+  };
+
+  const onChangeTable: TableProps<any>["onChange"] = (
+    pagination,
+    filters: any,
+    sorter,
+    extra
+  ) => {
+    if (filters.id) {
+      setParamsFilters({
+        ...paramsFilters,
+        id: filters.id[0],
+      });
+    }
+
+    if (filters.name) {
+      setParamsFilters({
+        ...paramsFilters,
+        name: filters.name[0],
+      });
+    }
+
+    if (filters.email) {
+      setParamsFilters({
+        ...paramsFilters,
+        email: filters.email[0],
+      });
+    }
+  };
+
+  const getColumnSearchProps = (dataIndex: string): ColumnType<any> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }: any) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search`}
+          value={selectedKeys[0]}
+          onChange={(e: any) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() =>
+            handleSearch(selectedKeys as string[], confirm, dataIndex)
+          }
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
+            icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() =>
+              clearFilters && handleReset(clearFilters, confirm, dataIndex)
+            }
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <FontAwesomeIcon
+        icon={faMagnifyingGlass}
+        style={{ color: filtered ? "#512A8A" : undefined }}
+      />
+    ),
+    onFilterDropdownOpenChange: (visible: any) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+  });
+
   const columns: ColumnsType<DataType> = [
     {
       title: "# Code",
       dataIndex: "id",
       key: "id",
+      ...getColumnSearchProps("id"),
       render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      ...getColumnSearchProps("name"),
       render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      ...getColumnSearchProps("email"),
       render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
       title: "Created",
       key: "created_at",
       dataIndex: "created_at",
-      render: (text) => <Tag color={colorsTags[text]}>{text.toString()}</Tag>,
+      render: (text) => (
+        <Tag color="green">{dayjs(text).format("DD MMM hh:mm a")}</Tag>
+      ),
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        close,
+      }: any) => (
+        <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+          <RangePicker
+            onChange={(date, dateString) => {
+              setParamsFilters({
+                ...paramsFilters,
+                from: dateString[0],
+                to: dateString[1],
+              });
+            }}
+          />
+          <br />
+        </div>
+      ),
     },
     {
       title: "Options",
@@ -196,10 +359,37 @@ export default function Home() {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const { data: users, error } = await supabase
-        .from("users")
-        .select("*")
-        .order("id", { ascending: false });
+      const query = supabase.from("users").select("*");
+
+      if (paramsFilters.email) {
+        query.ilike("email", `%${paramsFilters.email}%`);
+      }
+
+      if (paramsFilters.name) {
+        query.ilike("name", `%${paramsFilters.name}%`);
+      }
+
+      if (paramsFilters.from || paramsFilters.to) {
+        query
+          .gt(
+            "created_at",
+            dayjs(paramsFilters.from)
+              .startOf("day")
+              .format("YYYY-MM-DD hh:mm:ss")
+          )
+          .lt(
+            "created_at",
+            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD hh:mm:ss")
+          );
+      }
+
+      if (paramsFilters.id) {
+        query.eq("id", paramsFilters.id);
+      }
+
+      const { data: users, error } = await query.order("id", {
+        ascending: false,
+      });
 
       setLoading(false);
       if (error) console.log("error", error);
@@ -209,7 +399,7 @@ export default function Home() {
     } catch (error) {
       setLoading(false);
     }
-  }, []);
+  }, [paramsFilters]);
 
   useEffect(() => {
     getAllData();
@@ -251,6 +441,7 @@ export default function Home() {
           loading={loading}
           columns={columns}
           dataSource={payload}
+          onChange={onChangeTable}
         />
       </Card>
 
