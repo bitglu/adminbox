@@ -16,18 +16,21 @@ export interface TransactionsDatabase {
           provider_id: string;
           type: string;
           amount: string;
+          status: string;
         };
         Insert: {
           provider_id: string;
           type: string;
           amount: string;
+          status: string;
         };
         Update: {
-          id: number;
-          created_at: string;
-          provider_id: string;
-          type: string;
-          amount: string;
+          id?: number;
+          created_at?: string;
+          provider_id?: string;
+          type?: string;
+          amount?: string;
+          status?: string;
         };
       };
     };

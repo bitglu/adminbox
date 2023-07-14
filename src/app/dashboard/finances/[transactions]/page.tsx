@@ -13,6 +13,7 @@ import {
   Input,
   InputRef,
   MenuProps,
+  Popconfirm,
   QRCode,
   Select,
   Space,
@@ -21,6 +22,7 @@ import {
   Tag,
   Timeline,
   Typography,
+  message,
 } from "antd";
 import {
   faChartSimple,
@@ -93,6 +95,8 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const [cashAmount, setCashAmount] = useState(0);
 
   const [form] = Form.useForm();
+  const [typeForm, setTypeForm] = useState<any>(null);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const supabase = useSupabaseClient<TransactionsDatabase>();
 
@@ -344,31 +348,99 @@ export default function Home({ params }: { params: { transactions: string } }) {
       title: "Options",
       key: "action",
       render: (_, record: TransactionsDatabaseType) => (
-        <Dropdown.Button menu={menuProps(record)}>Options</Dropdown.Button>
+        <Space>
+          <Button
+            type="dashed"
+            size="small"
+            onClick={() => {
+              form.setFieldsValue({
+                amount: record.amount,
+                type: record.type,
+              });
+              setTypeForm(record.id);
+              setOpen(true);
+            }}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Delete?"
+            description="Are you sure to delete this?"
+            onConfirm={() => confirmDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button danger size="small">
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
+
+  const confirmDelete = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from("transactions")
+        .update({ status: "deleted" })
+        .eq("id", id);
+
+      registerLog({
+        action: "delete finance",
+      });
+
+      messageApi.open({
+        type: "success",
+        content: "deletion completed",
+      });
+
+      getAllData();
+    } catch (error) {
+      console.log("🚀 ~ file: page.tsx:378 ~ confirmDelete ~ error:", error);
+    }
+  };
 
   const onFinish = async (values: any) => {
     try {
       setLoading(true);
 
-      const { data: transaction, error } = await supabase
-        .from("transactions")
-        .insert({ ...values, provider_id: params.transactions })
-        .select()
-        .single();
+      if (typeForm) {
+        const { error } = await supabase
+          .from("transactions")
+          .update(values)
+          .eq("id", typeForm);
 
-      if (error) {
-        setLoading(false);
-      } else {
-        registerLog({
-          action: "create transaction finance",
+        messageApi.open({
+          type: "success",
+          content: "Updated success",
         });
         form.resetFields();
-        setOpen(false);
         setLoading(false);
+        setTypeForm(null);
+        registerLog({
+          action: "update transaction provider",
+        });
+        setOpen(false);
         getAllData();
+      } else {
+        const { data: transaction, error } = await supabase
+          .from("transactions")
+          .insert({ ...values, provider_id: params.transactions })
+          .select()
+          .single();
+
+        if (error) {
+          setLoading(false);
+        } else {
+          registerLog({
+            action: "create transaction finance",
+          });
+          form.resetFields();
+          setOpen(false);
+          setLoading(false);
+          getAllData();
+        }
       }
     } catch (error) {
       console.log(error);
@@ -394,7 +466,10 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const query = supabase.from("transactions").select("*");
+      const query = supabase
+        .from("transactions")
+        .select("*")
+        .eq("status", "active");
 
       if (params.transactions) {
         query.eq("provider_id", params.transactions);
