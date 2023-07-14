@@ -6,38 +6,31 @@ export type Json =
   | { [key: string]: Json }
   | Json[];
 
-export interface UsersDatabase {
+export interface LogsDatabase {
   public: {
     Tables: {
-      users: {
+      logs: {
         Row: {
           id: number;
           created_at: string;
-          email: string;
-          status: string;
-          name: string;
-          password: string;
+          actions: string;
+          user_id: string;
         };
         Insert: {
-          email: string;
-          name: string;
-          password: string;
+          user_id: string;
+          action: string;
         };
         Update: {
           id: number;
           created_at: string;
-          email: string;
-          name: string;
-          password: string;
-          status: string;
+          actions: string;
+          user_id: string;
         };
         Delete: {
           id: number;
           created_at: string;
-          email: string;
-          name: string;
-          password: string;
-          status: string;
+          actions: string;
+          user_id: string;
         };
       };
     };

@@ -12,6 +12,7 @@ import {
   Input,
   InputRef,
   MenuProps,
+  Popconfirm,
   QRCode,
   Space,
   Statistic,
@@ -19,6 +20,7 @@ import {
   Tag,
   Timeline,
   Typography,
+  message,
 } from "antd";
 import {
   faChartSimple,
@@ -78,6 +80,8 @@ export default function Home() {
   const [open, setOpen] = useState(false);
 
   const [form] = Form.useForm();
+  const [typeForm, setTypeForm] = useState<any>(null);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const supabase = useSupabaseClient<ProvidersDatabaseType>();
 
@@ -306,33 +310,114 @@ export default function Home() {
       title: "Options",
       key: "action",
       render: (_, record: ProvidersDatabaseType) => (
-        <Dropdown.Button menu={menuProps(record)}>Options</Dropdown.Button>
+        <Space>
+          <Button
+            type="dashed"
+            size="small"
+            onClick={() => {
+              form.setFieldsValue({
+                name: record.name,
+                description: record.description,
+              });
+              setTypeForm(record.id);
+              setOpen(true);
+            }}
+          >
+            Edit
+          </Button>
+          <Popconfirm
+            title="Delete?"
+            description="Are you sure to delete this?"
+            onConfirm={() => confirmDelete(record.id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button danger size="small">
+              Delete
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
+
+  const confirmDelete = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from("providers")
+        .update({ status: "deleted" })
+        .eq("id", id);
+
+      registerLog({
+        action: "delete provider",
+      });
+
+      messageApi.open({
+        type: "success",
+        content: "deletion completed",
+      });
+
+      getAllData();
+    } catch (error) {
+      console.log("🚀 ~ file: page.tsx:378 ~ confirmDelete ~ error:", error);
+    }
+  };
 
   const onFinish = async (values: any) => {
     try {
       setLoading(true);
 
-      const { data: provider, error } = await supabase
-        .from("providers")
-        .insert({ ...values, type: "general" })
-        .select()
-        .single();
+      if (typeForm) {
+        const { error } = await supabase
+          .from("providers")
+          .update(values)
+          .eq("id", typeForm);
 
-      if (error) {
-        console.log("🚀 ~ file: page.tsx:189 ~ onFinish ~ error:", error);
-        setLoading(false);
-      } else {
+        messageApi.open({
+          type: "success",
+          content: "Updated completed",
+        });
         form.resetFields();
-        setOpen(false);
         setLoading(false);
+        setTypeForm(null);
+        registerLog({
+          action: "update provider",
+        });
+        setOpen(false);
         getAllData();
+      } else {
+        const { data: provider, error } = await supabase
+          .from("providers")
+          .insert({ ...values, type: "general" })
+          .select()
+          .single();
+
+        if (error) {
+          setLoading(false);
+        } else {
+          form.resetFields();
+          registerLog({
+            action: "create provider",
+          });
+          setOpen(false);
+          setLoading(false);
+          getAllData();
+        }
       }
     } catch (error) {
-      console.log("🚀 ~ file: page.tsx:197 ~ onFinish ~ error:", error);
       console.log(error);
+    }
+  };
+
+  const registerLog = async (values: { action: string }) => {
+    try {
+      const { data: user, error } = await supabase
+        .from("logs")
+        .insert({ user_id: 1, ...values })
+        .select()
+        .single();
+    } catch (error) {
+      console.log("🚀 ", error);
     }
   };
 
@@ -346,7 +431,8 @@ export default function Home() {
       const query = supabase
         .from("providers")
         .select("*")
-        .eq("type", "general");
+        .eq("type", "general")
+        .eq("status", "active");
 
       if (paramsFilters.description) {
         query.ilike("description", `%${paramsFilters.description}%`);
@@ -382,6 +468,8 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
+      {contextHolder}
+
       <Card
         bordered={false}
         title="Providers"

@@ -362,6 +362,9 @@ export default function Home({ params }: { params: { transactions: string } }) {
       if (error) {
         setLoading(false);
       } else {
+        registerLog({
+          action: "create transaction finance",
+        });
         form.resetFields();
         setOpen(false);
         setLoading(false);
@@ -369,6 +372,18 @@ export default function Home({ params }: { params: { transactions: string } }) {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const registerLog = async (values: { action: string }) => {
+    try {
+      const { data: user, error } = await supabase
+        .from("logs")
+        .insert({ user_id: 1, ...values })
+        .select()
+        .single();
+    } catch (error) {
+      console.log("🚀 ", error);
     }
   };
 

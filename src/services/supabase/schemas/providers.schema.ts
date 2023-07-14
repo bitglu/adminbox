@@ -13,19 +13,19 @@ export interface ProvidersDatabase {
         Row: {
           id: number;
           created_at: string;
-          email: string;
+          description: string;
           name: string;
           type: string;
         };
         Insert: {
-          email: string;
+          description: string;
           name: string;
           type: string;
         };
         Update: {
           id: number;
           created_at: string;
-          email: string;
+          description: string;
           name: string;
           type: string;
         };

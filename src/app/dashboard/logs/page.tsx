@@ -9,25 +9,23 @@ import {
   Dropdown,
   Form,
   FormInstance,
-  Image,
   Input,
   InputRef,
   MenuProps,
+  Popconfirm,
   QRCode,
-  Select,
   Space,
   Statistic,
   Table,
   Tag,
   Timeline,
   Typography,
+  message,
 } from "antd";
 import {
   faChartSimple,
   faUsers,
-  faArrowLeft,
   faBoxesStacked,
-  faRuler,
   faPenToSquare,
   faShield,
   faStoreSlash,
@@ -35,30 +33,35 @@ import {
   faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ColumnType, ColumnsType, TableProps } from "antd/es/table";
-import { ProjectZonesDataFaker } from "@/services/data";
-import { useRouter } from "next/navigation";
-
-const { Paragraph } = Typography;
+import { UsersDataFaker } from "@/services/data";
 
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { TransactionsDatabase } from "@/services/supabase/schemas/transactions.schema";
+import { LogsDatabase } from "@/services/supabase/schemas/logs.schema";
+type UsersDatabaseType = LogsDatabase["public"]["Tables"]["logs"]["Row"];
 import dayjs from "dayjs";
 import { FilterConfirmProps } from "antd/es/table/interface";
-type TransactionsDatabaseType =
-  TransactionsDatabase["public"]["Tables"]["transactions"]["Row"];
+
+const { Paragraph } = Typography;
+const { RangePicker } = DatePicker;
+
+interface DataType {
+  _id: string;
+  id: string;
+  code?: string;
+  name: string;
+  email: string;
+  rol: string;
+}
 
 const colorsTags: any = {
-  Pending: "cyan",
-  Delivery: "green",
-  Cancel: "red",
+  User: "cyan",
+  Admin: "green",
+  Packer: "red",
 };
-
-const { RangePicker } = DatePicker;
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
   const [submittable, setSubmittable] = React.useState(false);
@@ -84,17 +87,13 @@ const SubmitButton = ({ form }: { form: FormInstance }) => {
   );
 };
 
-export default function Home({ params }: { params: { transactions: string } }) {
-  const router = useRouter();
-
+export default function Home() {
   const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState<any>([]);
   const [open, setOpen] = useState(false);
 
-  const [creditAmount, setCreditAmount] = useState(0);
-  const [cashAmount, setCashAmount] = useState(0);
-
   const [form] = Form.useForm();
+  const [typeForm, setTypeForm] = useState<any>(null);
 
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -102,16 +101,17 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
   const [paramsFilters, setParamsFilters] = useState<any>({
     id: null,
-    type: null,
-    date: null,
-    code: null,
+    user_id: null,
+    action: null,
     from: null,
     to: null,
   });
 
-  const supabase = useSupabaseClient<TransactionsDatabase>();
+  const [messageApi, contextHolder] = message.useMessage();
 
-  const handleMenuClick = (e: any, record: TransactionsDatabaseType) => {
+  const supabase = useSupabaseClient<UsersDatabaseType>();
+
+  const handleMenuClick = (e: any, record: DataType) => {
     const status: any = {
       "1": "sdsd",
       "2": "StatusEnum.ACTIVE",
@@ -121,7 +121,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
     //updateStatus(status[e?.key], record);
   };
 
-  const menuProps: any = (record: TransactionsDatabaseType) => ({
+  const menuProps: any = (record: DataType) => ({
     items,
     onClick: (e: MenuProps["onClick"]) => handleMenuClick(e, record),
   });
@@ -178,6 +178,34 @@ export default function Home({ params }: { params: { transactions: string } }) {
       [dataIndex]: null,
     });
     confirm();
+  };
+
+  const onChangeTable: TableProps<any>["onChange"] = (
+    pagination,
+    filters: any,
+    sorter,
+    extra
+  ) => {
+    if (filters.id) {
+      setParamsFilters({
+        ...paramsFilters,
+        id: filters.id[0],
+      });
+    }
+
+    if (filters.user_id) {
+      setParamsFilters({
+        ...paramsFilters,
+        user_id: filters.user_id[0],
+      });
+    }
+
+    if (filters.action) {
+      setParamsFilters({
+        ...paramsFilters,
+        action: filters.action[0],
+      });
+    }
   };
 
   const getColumnSearchProps = (dataIndex: string): ColumnType<any> => ({
@@ -248,89 +276,34 @@ export default function Home({ params }: { params: { transactions: string } }) {
     },
   });
 
-  const onChangeTable: TableProps<any>["onChange"] = (
-    pagination,
-    filters: any,
-    sorter,
-    extra
-  ) => {
-    if (filters.id) {
-      setParamsFilters({
-        ...paramsFilters,
-        id: filters.id[0],
-      });
-    }
-
-    if (filters.type) {
-      setParamsFilters({
-        ...paramsFilters,
-        type: filters.type[0],
-      });
-    }
-
-    if (paramsFilters.type && !filters.type) {
-      setParamsFilters({
-        ...paramsFilters,
-        type: null,
-      });
-    }
-  };
-
-  const columns: ColumnsType<TransactionsDatabaseType> = [
+  const columns: ColumnsType<DataType> = [
     {
       title: "# Code",
       dataIndex: "id",
       key: "id",
       ...getColumnSearchProps("id"),
-      render: (text) => (
-        <Paragraph copyable style={{ cursor: "pointer" }}>
-          {text?.toString()}
-        </Paragraph>
-      ),
+      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
-      title: "Provider ID",
-      dataIndex: "provider_id",
-      key: "provider_id",
-      render: (text) => (
-        <Paragraph copyable style={{ cursor: "pointer" }}>
-          {text?.toString()}
-        </Paragraph>
-      ),
+      title: "User Id",
+      dataIndex: "user_id",
+      key: "user_id",
+      ...getColumnSearchProps("user_id"),
+      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
-      title: "type",
-      dataIndex: "type",
-      key: "type",
-      filterMultiple: false,
-      filters: [
-        {
-          text: "Cash",
-          value: "Cash",
-        },
-        {
-          text: "Credit",
-          value: "Credit",
-        },
-      ],
-      render: (text) => (
-        <Tag color={text === "Credit" ? "blue" : "purple"}>
-          {text?.toString()}
-        </Tag>
-      ),
+      title: "Action",
+      dataIndex: "action",
+      key: "action",
+      ...getColumnSearchProps("action"),
+      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
     },
     {
-      title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
-      render: (text) => <Tag color="green">{text?.toString()}</Tag>,
-    },
-    {
-      title: "Date",
-      dataIndex: "created_at",
+      title: "Created",
       key: "created_at",
+      dataIndex: "created_at",
       render: (text) => (
-        <Paragraph copyable>{dayjs(text).format("DD MMM hh:mm a")}</Paragraph>
+        <Tag color="green">{dayjs(text).format("DD MMM hh:mm a")}</Tag>
       ),
       filterDropdown: ({
         setSelectedKeys,
@@ -353,70 +326,19 @@ export default function Home({ params }: { params: { transactions: string } }) {
         </div>
       ),
     },
-    {
-      title: "Options",
-      key: "action",
-      render: (_, record: TransactionsDatabaseType) => (
-        <Dropdown.Button menu={menuProps(record)}>Options</Dropdown.Button>
-      ),
-    },
   ];
-
-  const onFinish = async (values: any) => {
-    try {
-      setLoading(true);
-
-      const { data: transaction, error } = await supabase
-        .from("transactions")
-        .insert({ ...values, provider_id: params.transactions })
-        .select()
-        .single();
-
-      if (error) {
-        console.log("🚀 ~ file: page.tsx:201 ~ onFinish ~ error:", error);
-        setLoading(false);
-      } else {
-        registerLog({
-          action: "create transaction provider",
-        });
-        form.resetFields();
-        setOpen(false);
-        setLoading(false);
-        getAllData();
-      }
-    } catch (error) {
-      console.log("🚀 ~ file: page.tsx:209 ~ onFinish ~ error:", error);
-      console.log(error);
-    }
-  };
-
-  const registerLog = async (values: { action: string }) => {
-    try {
-      const { data: user, error } = await supabase
-        .from("logs")
-        .insert({ user_id: 1, ...values })
-        .select()
-        .single();
-    } catch (error) {
-      console.log("🚀 ", error);
-    }
-  };
-
-  const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
-  };
 
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const query = supabase.from("transactions").select("*");
+      const query = supabase.from("logs").select("*");
 
-      if (params.transactions) {
-        query.eq("provider_id", params.transactions);
+      if (paramsFilters.user_id) {
+        query.eq("user_id", paramsFilters.user_id);
       }
 
-      if (paramsFilters.type) {
-        query.eq("type", paramsFilters.type);
+      if (paramsFilters.action) {
+        query.ilike("action", `%${paramsFilters.action}%`);
       }
 
       if (paramsFilters.from || paramsFilters.to) {
@@ -444,27 +366,6 @@ export default function Home({ params }: { params: { transactions: string } }) {
       setLoading(false);
       if (error) console.log("error", error);
       else {
-        setCreditAmount(
-          users
-            .map((ele) => {
-              if (ele.type === "Credit") {
-                return ele.amount;
-              }
-            })
-            .filter((ele) => ele)
-            .reduce((ele, a: any) => ele + a, 0)
-        );
-        setCashAmount(
-          users
-            .map((ele) => {
-              if (ele.type === "Cash") {
-                return ele.amount;
-              }
-            })
-            .filter((ele) => ele)
-            .reduce((ele, a: any) => ele + a, 0)
-        );
-
         setPayload(users);
       }
     } catch (error) {
@@ -480,62 +381,23 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
   return (
     <main className={styles.main}>
+      {contextHolder}
+
       <Card
         bordered={false}
-        title={`Provider ${params.transactions}`}
+        title="Logs"
         extra={
           <Space>
             <Button
               type="ghost"
-              icon={
-                <FontAwesomeIcon
-                  icon={faArrowLeft}
-                  style={{ marginRight: 5 }}
-                />
-              }
-              onClick={() => router.push("/dashboard/providers")}
-            >
-              Back to providers
-            </Button>
-
-            <Button
-              type="primary"
-              icon={
-                <FontAwesomeIcon icon={faRuler} style={{ marginRight: 5 }} />
-              }
-              onClick={() => setOpen(true)}
-            >
-              New transaction
-            </Button>
-
-            <Button
-              type="ghost"
               loading={loading}
               disabled={loading}
-              onClick={() => {}}
+              onClick={getAllData}
             >
               Refresh
             </Button>
           </Space>
         }
-        actions={[
-          <Space key={1}>
-            <Statistic
-              title="Total Credit"
-              value={creditAmount}
-              style={{ marginLeft: 10, marginRight: 10 }}
-              valueStyle={{ color: "#1662DC" }}
-              prefix="$"
-            />
-            <Statistic
-              title="Total Cash"
-              value={cashAmount}
-              style={{ marginLeft: 10, marginRight: 10 }}
-              valueStyle={{ color: "#531DAB" }}
-              prefix="$"
-            />
-          </Space>,
-        ]}
       >
         <Table
           rowKey="id"
@@ -545,39 +407,6 @@ export default function Home({ params }: { params: { transactions: string } }) {
           onChange={onChangeTable}
         />
       </Card>
-
-      <Drawer
-        title="New transaction"
-        placement="right"
-        onClose={() => setOpen(false)}
-        open={open}
-      >
-        <Form
-          form={form}
-          name="validateOnly"
-          layout="vertical"
-          autoComplete="off"
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-        >
-          <Form.Item name="type" label="Type" rules={[{ required: true }]}>
-            <Select>
-              <Select.Option value="Credit">Credit</Select.Option>
-              <Select.Option value="Cash">Cash</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item>
-            <Space>
-              <SubmitButton form={form} />
-              <Button htmlType="reset">Reset</Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Drawer>
     </main>
   );
 }

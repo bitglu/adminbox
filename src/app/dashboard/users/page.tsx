@@ -376,7 +376,11 @@ export default function Home() {
           content: "Updated completed",
         });
         form.resetFields();
+        registerLog({
+          action: "update user",
+        });
         setLoading(false);
+        setTypeForm(null);
         setOpen(false);
         getAllData();
       } else {
@@ -388,6 +392,9 @@ export default function Home() {
         if (error) {
           setLoading(false);
         } else {
+          registerLog({
+            action: "create user",
+          });
           form.resetFields();
           setOpen(false);
           setLoading(false);
@@ -405,6 +412,10 @@ export default function Home() {
         .from("users")
         .update({ status: "deleted" })
         .eq("id", id);
+
+      registerLog({
+        action: "delete user",
+      });
 
       messageApi.open({
         type: "success",
@@ -465,6 +476,18 @@ export default function Home() {
       setLoading(false);
     }
   }, [paramsFilters]);
+
+  const registerLog = async (values: { action: string }) => {
+    try {
+      const { data: user, error } = await supabase
+        .from("logs")
+        .insert({ user_id: 1, ...values })
+        .select()
+        .single();
+    } catch (error) {
+      console.log("🚀 ", error);
+    }
+  };
 
   useEffect(() => {
     getAllData();
