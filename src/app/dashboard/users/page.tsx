@@ -377,7 +377,7 @@ export default function Home() {
         });
         form.resetFields();
         registerLog({
-          action: "update user",
+          action: `update user ${typeForm}`,
         });
         setLoading(false);
         setTypeForm(null);
@@ -414,7 +414,7 @@ export default function Home() {
         .eq("id", id);
 
       registerLog({
-        action: "delete user",
+        action: `delete user ${id}`,
       });
 
       messageApi.open({

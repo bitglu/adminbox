@@ -289,7 +289,11 @@ export default function Home() {
       dataIndex: "user_id",
       key: "user_id",
       ...getColumnSearchProps("user_id"),
-      render: (text) => <Paragraph copyable>{text.toString()}</Paragraph>,
+      render: (text, record: any) => (
+        <Paragraph copyable={{ text: record?.user_id?.name }}>
+          {record?.user_id?.name}
+        </Paragraph>
+      ),
     },
     {
       title: "Action",
@@ -331,7 +335,7 @@ export default function Home() {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
-      const query = supabase.from("logs").select("*");
+      const query = supabase.from("logs").select("*, user_id:users(*)");
 
       if (paramsFilters.user_id) {
         query.eq("user_id", paramsFilters.user_id);

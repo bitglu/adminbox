@@ -387,12 +387,12 @@ export default function Home({ params }: { params: { transactions: string } }) {
         .eq("id", id);
 
       registerLog({
-        action: "delete finance",
+        action: `delete transaction finance ${id}`,
       });
 
       messageApi.open({
         type: "success",
-        content: "deletion completed",
+        content: `deletion completed ${id}`,
       });
 
       getAllData();
@@ -413,7 +413,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
         messageApi.open({
           type: "success",
-          content: "Updated success",
+          content: `Updated success ${typeForm}`,
         });
         form.resetFields();
         setLoading(false);

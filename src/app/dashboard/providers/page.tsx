@@ -349,7 +349,7 @@ export default function Home() {
         .eq("id", id);
 
       registerLog({
-        action: "delete provider",
+        action: `delete provider ${typeForm}`,
       });
 
       messageApi.open({
@@ -375,7 +375,7 @@ export default function Home() {
 
         messageApi.open({
           type: "success",
-          content: "Updated completed",
+          content: `Updated completed ${typeForm}`,
         });
         form.resetFields();
         setLoading(false);

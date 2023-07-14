@@ -350,12 +350,12 @@ export default function Home() {
         .eq("id", id);
 
       registerLog({
-        action: "delete finance",
+        action: `delete finance ${id}`,
       });
 
       messageApi.open({
         type: "success",
-        content: "deletion completed",
+        content: `deletion completed ${id}`,
       });
 
       getAllData();
@@ -380,7 +380,7 @@ export default function Home() {
         });
 
         registerLog({
-          action: "update finance",
+          action: `update finance ${typeForm}`,
         });
         form.resetFields();
         setLoading(false);

@@ -400,7 +400,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
         .eq("id", id);
 
       registerLog({
-        action: "delete finance",
+        action: `delete transaction provider ${id}`,
       });
 
       messageApi.open({
@@ -432,7 +432,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
         setLoading(false);
         setTypeForm(null);
         registerLog({
-          action: "update transaction provider",
+          action: `update transaction provider ${typeForm}`,
         });
         setOpen(false);
         getAllData();
