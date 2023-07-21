@@ -158,6 +158,10 @@ export default function Home({ params }: { params: { provider: string } }) {
   const [typeForm, setTypeForm] = useState<any>(null);
   const [messageApi, contextHolder] = message.useMessage();
 
+  const [singleData, setsingleData] = useState({
+    name: "",
+  });
+
   const [dataExportPdf, setdataExportPdf] = useState([]);
   const [showReportPdf, setshowReportPdf] = useState(false);
 
@@ -569,6 +573,13 @@ export default function Home({ params }: { params: { provider: string } }) {
 
       if (params.provider) {
         query.eq("provider_id", params.provider);
+        let { data: provider } = await supabase
+          .from("providers")
+          .select("*")
+          .eq("id", params.provider)
+          .single();
+
+        setsingleData(provider);
       }
 
       if (paramsFilters.description) {
@@ -705,7 +716,7 @@ export default function Home({ params }: { params: { provider: string } }) {
 
       <Card
         bordered={false}
-        title="Providers"
+        title={singleData?.name}
         extra={
           <Space>
             <Button
@@ -803,7 +814,7 @@ export default function Home({ params }: { params: { provider: string } }) {
       {showReportPdf && (
         <Fragment>
           <PDFViewer width="1000" height="600" className="app">
-            <Invoice invoice={dataExportPdf} />
+            <Invoice invoice={dataExportPdf} title={singleData?.name} />
           </PDFViewer>
         </Fragment>
       )}

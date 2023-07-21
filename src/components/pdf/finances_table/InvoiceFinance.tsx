@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const InvoiceFinance = ({ invoice }: any) => (
+const InvoiceFinance = ({ invoice, title, module }: any) => (
   <Document>
     <Page size="A4" style={styles.page}>
       {/* <Image
@@ -33,10 +33,10 @@ const InvoiceFinance = ({ invoice }: any) => (
           "https://i.pinimg.com/originals/77/44/80/7744806c7e15d502830a1fdd8e2a37e9.gif"
         }
       /> */}
-      <InvoiceTitle title="Report" />
+      <InvoiceTitle title={title} />
       <InvoiceNo invoice={invoice} />
       {/* <BillTo invoice={invoice} /> */}
-      <InvoiceItemsTable invoice={invoice} />
+      <InvoiceItemsTable invoice={invoice} module={module} />
       <InvoiceThankYouMsg />
     </Page>
   </Document>

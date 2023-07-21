@@ -26,18 +26,78 @@ const styles = StyleSheet.create({
   },
 });
 
-const InvoiceTableFooter = ({ items }: any) => {
+const InvoiceTableFooter = ({ items, module }: any) => {
   const total = items
     .map((item: any) => item.amount)
     .reduce(
       (accumulator: any, currentValue: any) => accumulator + currentValue,
       0
     );
+
+  const cash = items
+    .map((item: any) => {
+      if (item.type === "Cash") {
+        return item.amount;
+      }
+    })
+    .filter((ele: any) => ele)
+    .reduce(
+      (accumulator: any, currentValue: any) => accumulator + currentValue,
+      0
+    );
+
+  const charge = items
+    .map((item: any) => {
+      if (item.type === "Charge") {
+        return item.amount;
+      }
+    })
+    .filter((ele: any) => ele)
+    .reduce(
+      (accumulator: any, currentValue: any) => accumulator + currentValue,
+      0
+    );
+
+  const credit = items
+    .map((item: any) => {
+      if (item.type === "Credit") {
+        return item.amount;
+      }
+    })
+    .filter((ele: any) => ele)
+    .reduce(
+      (accumulator: any, currentValue: any) => accumulator + currentValue,
+      0
+    );
   return (
-    <View style={styles.row}>
-      <Text style={styles.description}>TOTAL</Text>
-      <Text style={styles.total}>{Number.parseFloat(total).toFixed(2)}</Text>
-    </View>
+    <>
+      {module !== "finances" && (
+        <View style={styles.row}>
+          <Text style={styles.description}>Credit</Text>
+          <Text style={styles.total}>
+            {Number.parseFloat(credit).toFixed(2)}
+          </Text>
+        </View>
+      )}
+
+      <View style={styles.row}>
+        <Text style={styles.description}>Cash</Text>
+        <Text style={styles.total}>{Number.parseFloat(cash).toFixed(2)}</Text>
+      </View>
+
+      {module !== "finances" && (
+        <View style={styles.row}>
+          <Text style={styles.description}>Charge</Text>
+          <Text style={styles.total}>
+            {Number.parseFloat(charge).toFixed(2)}
+          </Text>
+        </View>
+      )}
+      <View style={styles.row}>
+        <Text style={styles.description}>TOTAL</Text>
+        <Text style={styles.total}>{Number.parseFloat(total).toFixed(2)}</Text>
+      </View>
+    </>
   );
 };
 

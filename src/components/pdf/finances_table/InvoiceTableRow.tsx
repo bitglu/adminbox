@@ -41,7 +41,9 @@ const InvoiceTableRow = ({ items }: any) => {
       <Text style={styles.qty}>
         {dayjs(item.create_at).format("DD MMM hh:mm a")}
       </Text>
-      <Text style={styles.amount}>{item.amount}</Text>
+      <Text style={styles.amount}>
+        {Number.parseFloat(item.amount).toFixed(2)}
+      </Text>
     </View>
   ));
   return <Fragment>{rows}</Fragment>;

@@ -17,12 +17,12 @@ const styles = StyleSheet.create({
   },
 });
 
-const InvoiceItemsTable = ({ invoice }: any) => (
+const InvoiceItemsTable = ({ invoice, module }: any) => (
   <View style={styles.tableContainer}>
     <InvoiceTableHeader />
     <InvoiceTableRow items={invoice} />
     <InvoiceTableBlankSpace rowsCount={tableRowsCount - invoice.length} />
-    <InvoiceTableFooter items={invoice} />
+    <InvoiceTableFooter items={invoice} module={module} />
   </View>
 );
 

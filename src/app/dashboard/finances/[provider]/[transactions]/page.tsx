@@ -124,6 +124,10 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
   const [cashAmount, setCashAmount] = useState(0);
 
+  const [singleData, setsingleData] = useState({
+    name: "",
+  });
+
   const [form] = Form.useForm();
   const [typeForm, setTypeForm] = useState<any>(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -505,6 +509,14 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
       if (params.transactions) {
         query.eq("provider_id", params.transactions);
+
+        let { data: provider } = await supabase
+          .from("providers")
+          .select("*")
+          .eq("id", params.transactions)
+          .single();
+
+        setsingleData(provider);
       }
 
       if (paramsFilters.type) {
@@ -572,7 +584,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
     <main className={styles.main}>
       <Card
         bordered={false}
-        title={`Finance ${params.transactions}`}
+        title={singleData?.name}
         extra={
           <Space>
             <Button
@@ -678,7 +690,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
       {showReportPdf && (
         <Fragment>
           <PDFViewer width="1000" height="600" className="app">
-            <InvoiceFinance invoice={payload} />
+            <InvoiceFinance invoice={payload} title={singleData?.name} module="finances" />
           </PDFViewer>
         </Fragment>
       )}
