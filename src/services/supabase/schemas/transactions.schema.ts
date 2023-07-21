@@ -16,12 +16,14 @@ export interface TransactionsDatabase {
           provider_id: string;
           type: string;
           amount: string;
+          charge: number;
           status: string;
         };
         Insert: {
           provider_id: string;
           type: string;
           amount: string;
+          charge: number;
           status: string;
         };
         Update: {
@@ -30,6 +32,7 @@ export interface TransactionsDatabase {
           provider_id?: string;
           type?: string;
           amount?: string;
+          charge?: number;
           status?: string;
         };
       };

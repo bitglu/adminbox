@@ -47,7 +47,7 @@ import { useRouter } from "next/navigation";
 /* Excel */
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
-export const ExportToExcel = ({ apiData, fileName }: any) => {
+const ExportToExcel = ({ apiData, fileName }: any) => {
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileExtension = ".xlsx";
@@ -339,6 +339,13 @@ export default function Home({ params }: { params: { transactions: string } }) {
       key: "amount",
       render: (text) => <Tag color="green">{text?.toString()}</Tag>,
     },
+
+    {
+      title: "Charge",
+      dataIndex: "charge",
+      key: "charge",
+      render: (text) => <Tag color="purple">{text?.toString()}</Tag>,
+    },
     {
       title: "Date",
       dataIndex: "created_at",
@@ -381,6 +388,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
               form.setFieldsValue({
                 amount: record.amount,
                 type: record.type,
+                charge: record.charge,
               });
               setTypeForm(record.id);
               setOpen(true);
@@ -557,6 +565,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
           users.map((ele) => ({
             type: ele.type,
             amount: ele.amount,
+            charge: ele.charge,
             date: dayjs(ele.created_at).format("DD MMM hh:mm a"),
           }))
         );
@@ -667,6 +676,10 @@ export default function Home({ params }: { params: { transactions: string } }) {
             </Select>
           </Form.Item>
           <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="charge" label="Charge" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
 

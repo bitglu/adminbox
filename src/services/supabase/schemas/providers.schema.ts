@@ -15,17 +15,20 @@ export interface ProvidersDatabase {
           created_at: string;
           description: string;
           name: string;
+          charge: number;
           type: string;
         };
         Insert: {
           description: string;
           name: string;
+          charge: number;
           type: string;
         };
         Update: {
           id: number;
           created_at: string;
           description: string;
+          charge: number;
           name: string;
           type: string;
         };
