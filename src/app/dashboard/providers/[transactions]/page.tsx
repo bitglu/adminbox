@@ -44,7 +44,26 @@ import type { ColumnType, ColumnsType, TableProps } from "antd/es/table";
 import { ProjectZonesDataFaker } from "@/services/data";
 import { useRouter } from "next/navigation";
 
-const { Paragraph } = Typography;
+/* Excel */
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
+export const ExportToExcel = ({ apiData, fileName }: any) => {
+  const fileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const fileExtension = ".xlsx";
+
+  const exportToCSV = (apiData: any, fileName: any) => {
+    const ws = XLSX.utils.json_to_sheet(apiData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, fileName + fileExtension);
+  };
+
+  return (
+    <Button onClick={(e) => exportToCSV(apiData, fileName)}>Export</Button>
+  );
+};
 
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
@@ -91,6 +110,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
   const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState<any>([]);
+  const [exportData, setExportData] = useState<any>([]);
   const [open, setOpen] = useState(false);
 
   const [creditAmount, setCreditAmount] = useState(0);
@@ -287,19 +307,9 @@ export default function Home({ params }: { params: { transactions: string } }) {
       key: "id",
       ...getColumnSearchProps("id"),
       render: (text) => (
-        <Paragraph copyable style={{ cursor: "pointer" }}>
+        <Typography.Paragraph copyable style={{ cursor: "pointer" }}>
           {text?.toString()}
-        </Paragraph>
-      ),
-    },
-    {
-      title: "Provider ID",
-      dataIndex: "provider_id",
-      key: "provider_id",
-      render: (text) => (
-        <Paragraph copyable style={{ cursor: "pointer" }}>
-          {text?.toString()}
-        </Paragraph>
+        </Typography.Paragraph>
       ),
     },
     {
@@ -334,7 +344,9 @@ export default function Home({ params }: { params: { transactions: string } }) {
       dataIndex: "created_at",
       key: "created_at",
       render: (text) => (
-        <Paragraph copyable>{dayjs(text).format("DD MMM hh:mm a")}</Paragraph>
+        <Typography.Paragraph copyable>
+          {dayjs(text).format("DD MMM hh:mm a")}
+        </Typography.Paragraph>
       ),
       filterDropdown: ({
         setSelectedKeys,
@@ -541,6 +553,13 @@ export default function Home({ params }: { params: { transactions: string } }) {
         );
 
         setPayload(users);
+        setExportData(
+          users.map((ele) => ({
+            type: ele.type,
+            amount: ele.amount,
+            date: dayjs(ele.created_at).format("DD MMM hh:mm a"),
+          }))
+        );
       }
     } catch (error) {
       setLoading(false);
@@ -592,6 +611,11 @@ export default function Home({ params }: { params: { transactions: string } }) {
             >
               Refresh
             </Button>
+
+            <ExportToExcel
+              apiData={exportData}
+              fileName={`provider ${params.transactions}`}
+            />
           </Space>
         }
         actions={[

@@ -45,6 +45,27 @@ import { useRouter } from "next/navigation";
 
 const { Paragraph } = Typography;
 
+/* Excel */
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
+export const ExportToExcel = ({ apiData, fileName }: any) => {
+  const fileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const fileExtension = ".xlsx";
+
+  const exportToCSV = (apiData: any, fileName: any) => {
+    const ws = XLSX.utils.json_to_sheet(apiData);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, fileName + fileExtension);
+  };
+
+  return (
+    <Button onClick={(e) => exportToCSV(apiData, fileName)}>Export</Button>
+  );
+};
+
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { TransactionsDatabase } from "@/services/supabase/schemas/transactions.schema";
@@ -90,6 +111,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
   const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState<any>([]);
+  const [exportData, setExportData] = useState<any>([]);
   const [open, setOpen] = useState(false);
 
   const [cashAmount, setCashAmount] = useState(0);
@@ -290,7 +312,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
         </Paragraph>
       ),
     },
-    {
+    /*  {
       title: "Provider ID",
       dataIndex: "provider_id",
       key: "provider_id",
@@ -299,7 +321,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
           {text?.toString()}
         </Paragraph>
       ),
-    },
+    }, */
     {
       title: "type",
       dataIndex: "type",
@@ -516,6 +538,14 @@ export default function Home({ params }: { params: { transactions: string } }) {
         );
 
         setPayload(users);
+
+        setExportData(
+          users.map((ele) => ({
+            type: ele.type,
+            amount: ele.amount,
+            date: dayjs(ele.created_at).format("DD MMM hh:mm a"),
+          }))
+        );
       }
     } catch (error) {
       setLoading(false);
@@ -565,6 +595,10 @@ export default function Home({ params }: { params: { transactions: string } }) {
             >
               Refresh
             </Button>
+            <ExportToExcel
+              apiData={exportData}
+              fileName={`Finance ${params.transactions}`}
+            />
           </Space>
         }
         actions={[
