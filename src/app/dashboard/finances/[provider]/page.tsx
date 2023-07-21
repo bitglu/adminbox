@@ -46,7 +46,7 @@ const { Paragraph } = Typography;
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { ProvidersDatabase } from "@/services/supabase/schemas/providers.schema";
-import { FilterConfirmProps } from "antd/es/table/interface";
+import { FilterConfirmProps, TableRowSelection } from "antd/es/table/interface";
 import dayjs from "dayjs";
 type ProvidersDatabaseType =
   ProvidersDatabase["public"]["Tables"]["providers"]["Row"];
@@ -105,6 +105,50 @@ export default function Home({ params }: { params: { provider: string } }) {
   const [form] = Form.useForm();
   const [typeForm, setTypeForm] = useState<any>(null);
   const [messageApi, contextHolder] = message.useMessage();
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+
+  const rowSelection: TableRowSelection<any> = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+      {
+        key: "odd",
+        text: "Select Odd Row",
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return false;
+            }
+            return true;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+      {
+        key: "even",
+        text: "Select Even Row",
+        onSelect: (changeableRowKeys) => {
+          let newSelectedRowKeys = [];
+          newSelectedRowKeys = changeableRowKeys.filter((_, index) => {
+            if (index % 2 !== 0) {
+              return true;
+            }
+            return false;
+          });
+          setSelectedRowKeys(newSelectedRowKeys);
+        },
+      },
+    ],
+  };
 
   const supabase = useSupabaseClient<ProvidersDatabaseType>();
 
@@ -499,10 +543,26 @@ export default function Home({ params }: { params: { provider: string } }) {
   }, [paramsFilters]);
 
   const getAllReportByExcel = useCallback(async () => {
-    const providersFilter = payload.map((ele: any) => ({
-      id: ele.id,
-      name: ele.name,
-    }));
+    let providersFilter: any;
+
+    if (selectedRowKeys.length <= 0) {
+      providersFilter = payload.map((ele: any) => {
+        return {
+          id: ele.id,
+          name: ele.name,
+        };
+      });
+    } else {
+      providersFilter = selectedRowKeys.map((ele) => {
+        if (payload.filter((e: any) => e.id === ele)[0]) {
+          return {
+            id: payload.filter((e: any) => e.id === ele)[0].id,
+            name: payload.filter((e: any) => e.id === ele)[0].name,
+          };
+        }
+      });
+    }
+
     let { data: data, error } = await supabase
       .from("transactions")
       .select("*")
@@ -558,7 +618,7 @@ export default function Home({ params }: { params: { provider: string } }) {
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const dataExcelSend = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(dataExcelSend, "ExportAll" + fileExtension);
-  }, [payload]);
+  }, [payload, selectedRowKeys]);
 
   useEffect(() => {
     getAllData();
@@ -620,6 +680,7 @@ export default function Home({ params }: { params: { provider: string } }) {
       >
         <Table
           rowKey="id"
+          rowSelection={rowSelection}
           loading={loading}
           columns={columns}
           dataSource={payload}
