@@ -4,7 +4,6 @@ import styles from "./page.module.css";
 import {
   Button,
   Card,
-  DatePicker,
   Drawer,
   Dropdown,
   Form,
@@ -15,7 +14,6 @@ import {
   MenuProps,
   Popconfirm,
   QRCode,
-  Select,
   Space,
   Statistic,
   Table,
@@ -27,59 +25,30 @@ import {
 import {
   faChartSimple,
   faUsers,
-  faArrowLeft,
   faBoxesStacked,
-  faRuler,
   faPenToSquare,
   faShield,
   faStoreSlash,
   faTrash,
+  faMoneyBill,
   faMagnifyingGlass,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ColumnType, ColumnsType, TableProps } from "antd/es/table";
-import { ProjectZonesDataFaker } from "@/services/data";
+import { ProjectDataFaker } from "@/services/data";
 import { useRouter } from "next/navigation";
 
-/* Excel */
-import * as FileSaver from "file-saver";
-import * as XLSX from "xlsx";
-const ExportToExcel = ({ apiData, fileName }: any) => {
-  const fileType =
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-  const fileExtension = ".xlsx";
-
-  const exportToCSV = (apiData: any, fileName: any) => {
-    const ws = XLSX.utils.json_to_sheet(apiData);
-    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const data = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(data, fileName + fileExtension);
-  };
-
-  return (
-    <Button onClick={(e) => exportToCSV(apiData, fileName)}>Export</Button>
-  );
-};
-
-const colorsTags: any = {
-  Cash: "geekblue",
-  Credit: "purple",
-  Charge: "magenta",
-};
+const { Paragraph } = Typography;
 
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { TransactionsDatabase } from "@/services/supabase/schemas/transactions.schema";
-import dayjs from "dayjs";
+import { ProvidersDatabase } from "@/services/supabase/schemas/providers.schema";
 import { FilterConfirmProps } from "antd/es/table/interface";
-type TransactionsDatabaseType =
-  TransactionsDatabase["public"]["Tables"]["transactions"]["Row"];
-
-const { RangePicker } = DatePicker;
+type ProvidersDatabaseType =
+  ProvidersDatabase["public"]["Tables"]["providers"]["Row"];
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
   const [submittable, setSubmittable] = React.useState(false);
@@ -105,21 +74,18 @@ const SubmitButton = ({ form }: { form: FormInstance }) => {
   );
 };
 
-export default function Home({ params }: { params: { transactions: string } }) {
+export default function Home({ params }: { params: { provider: string } }) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState<any>([]);
-  const [exportData, setExportData] = useState<any>([]);
   const [open, setOpen] = useState(false);
-
-  const [creditAmount, setCreditAmount] = useState(0);
-  const [cashAmount, setCashAmount] = useState(0);
-  const [chargeAmount, setChargeAmount] = useState(0);
 
   const [form] = Form.useForm();
   const [typeForm, setTypeForm] = useState<any>(null);
   const [messageApi, contextHolder] = message.useMessage();
+
+  const supabase = useSupabaseClient<ProvidersDatabaseType>();
 
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -127,16 +93,11 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
   const [paramsFilters, setParamsFilters] = useState<any>({
     id: null,
-    type: null,
-    date: null,
-    code: null,
-    from: null,
-    to: null,
+    name: null,
+    description: null,
   });
 
-  const supabase = useSupabaseClient<TransactionsDatabase>();
-
-  const handleMenuClick = (e: any, record: TransactionsDatabaseType) => {
+  const handleMenuClick = (e: any, record: ProvidersDatabaseType) => {
     const status: any = {
       "1": "sdsd",
       "2": "StatusEnum.ACTIVE",
@@ -146,7 +107,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
     //updateStatus(status[e?.key], record);
   };
 
-  const menuProps: any = (record: TransactionsDatabaseType) => ({
+  const menuProps: any = (record: ProvidersDatabaseType) => ({
     items,
     onClick: (e: MenuProps["onClick"]) => handleMenuClick(e, record),
   });
@@ -203,6 +164,34 @@ export default function Home({ params }: { params: { transactions: string } }) {
       [dataIndex]: null,
     });
     confirm();
+  };
+
+  const onChangeTable: TableProps<any>["onChange"] = (
+    pagination,
+    filters: any,
+    sorter,
+    extra
+  ) => {
+    if (filters.id) {
+      setParamsFilters({
+        ...paramsFilters,
+        id: filters.id[0],
+      });
+    }
+
+    if (filters.name) {
+      setParamsFilters({
+        ...paramsFilters,
+        name: filters.name[0],
+      });
+    }
+
+    if (filters.description) {
+      setParamsFilters({
+        ...paramsFilters,
+        description: filters.description[0],
+      });
+    }
   };
 
   const getColumnSearchProps = (dataIndex: string): ColumnType<any> => ({
@@ -273,112 +262,64 @@ export default function Home({ params }: { params: { transactions: string } }) {
     },
   });
 
-  const onChangeTable: TableProps<any>["onChange"] = (
-    pagination,
-    filters: any,
-    sorter,
-    extra
-  ) => {
-    if (filters.id) {
-      setParamsFilters({
-        ...paramsFilters,
-        id: filters.id[0],
-      });
-    }
-
-    if (filters.type) {
-      setParamsFilters({
-        ...paramsFilters,
-        type: filters.type[0],
-      });
-    }
-
-    if (paramsFilters.type && !filters.type) {
-      setParamsFilters({
-        ...paramsFilters,
-        type: null,
-      });
-    }
-  };
-
-  const columns: ColumnsType<TransactionsDatabaseType> = [
+  const columns: ColumnsType<ProvidersDatabaseType> = [
     {
       title: "# Code",
       dataIndex: "id",
       key: "id",
       ...getColumnSearchProps("id"),
       render: (text) => (
-        <Typography.Paragraph copyable style={{ cursor: "pointer" }}>
-          {text?.toString()}
-        </Typography.Paragraph>
+        <Button
+          type="link"
+          onClick={() => router.push(`/dashboard/finances/${params.provider}/${text}`)}
+          style={{ cursor: "pointer" }}
+        >
+          {text.toString()}
+        </Button>
       ),
     },
     {
-      title: "type",
-      dataIndex: "type",
-      key: "type",
-      filterMultiple: false,
-      filters: [
-        {
-          text: "Cash",
-          value: "Cash",
-        },
-        {
-          text: "Credit",
-          value: "Credit",
-        },
-      ],
-      render: (text) => <Tag color={colorsTags[text]}>{text?.toString()}</Tag>,
-    },
-    {
-      title: "Amount",
-      dataIndex: "amount",
-      key: "amount",
-      render: (text) => <Tag color="green">{text?.toString()}</Tag>,
-    },
-    {
-      title: "Date",
-      dataIndex: "created_at",
-      key: "created_at",
-      render: (text) => (
-        <Typography.Paragraph copyable>
-          {dayjs(text).format("DD MMM hh:mm a")}
-        </Typography.Paragraph>
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      ...getColumnSearchProps("name"),
+      render: (text, record) => (
+        <Paragraph
+          copyable
+          onClick={() => router.push(`/dashboard/finances/${params.provider}/${record.id}`)}
+          style={{ cursor: "pointer" }}
+        >
+          <Button type="link">{text.toString()}</Button>
+        </Paragraph>
       ),
-      filterDropdown: ({
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-        close,
-      }: any) => (
-        <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
-          <RangePicker
-            onChange={(date, dateString) => {
-              setParamsFilters({
-                ...paramsFilters,
-                from: dateString[0],
-                to: dateString[1],
-              });
-            }}
-          />
-          <br />
-        </div>
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      ...getColumnSearchProps("description"),
+      render: (text, record) => (
+        <Paragraph
+          copyable
+          onClick={() => router.push(`/dashboard/finances/${params.provider}/${record.id}`)}
+          style={{ cursor: "pointer" }}
+        >
+          {text.toString()}
+        </Paragraph>
       ),
     },
     {
       title: "Options",
       key: "action",
-      render: (_, record: TransactionsDatabaseType) => (
+      render: (_, record: ProvidersDatabaseType) => (
         <Space>
           <Button
             type="dashed"
             size="small"
             onClick={() => {
               form.setFieldsValue({
-                amount: record.amount,
-                type: record.type,
-                charge: record.charge,
+                name: record.name,
+                description: record.description,
               });
               setTypeForm(record.id);
               setOpen(true);
@@ -405,17 +346,17 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const confirmDelete = async (id: number) => {
     try {
       const { error } = await supabase
-        .from("transactions")
+        .from("providers")
         .update({ status: "deleted" })
         .eq("id", id);
 
       registerLog({
-        action: `delete transaction provider ${id}`,
+        action: `delete finance ${id}`,
       });
 
       messageApi.open({
         type: "success",
-        content: "deletion completed",
+        content: `deletion completed ${id}`,
       });
 
       getAllData();
@@ -430,35 +371,35 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
       if (typeForm) {
         const { error } = await supabase
-          .from("transactions")
+          .from("providers")
           .update(values)
           .eq("id", typeForm);
 
         messageApi.open({
           type: "success",
-          content: "Updated success",
+          content: "Updated completed",
+        });
+
+        registerLog({
+          action: `update sub provider finance ${typeForm}`,
         });
         form.resetFields();
         setLoading(false);
         setTypeForm(null);
-        registerLog({
-          action: `update transaction provider ${typeForm}`,
-        });
         setOpen(false);
         getAllData();
       } else {
-        const { data: transaction, error } = await supabase
-          .from("transactions")
-          .insert({ ...values, provider_id: params.transactions })
+        const { data: provider, error } = await supabase
+          .from("providers")
+          .insert({ ...values, type: "sub_finances", provider_id: params.provider })
           .select()
           .single();
 
         if (error) {
-          console.log("🚀 ~ file: page.tsx:201 ~ onFinish ~ error:", error);
           setLoading(false);
         } else {
           registerLog({
-            action: "create transaction provider",
+            action: "create sub provider finance",
           });
           form.resetFields();
           setOpen(false);
@@ -467,7 +408,6 @@ export default function Home({ params }: { params: { transactions: string } }) {
         }
       }
     } catch (error) {
-      console.log("🚀 ~ file: page.tsx:209 ~ onFinish ~ error:", error);
       console.log(error);
     }
   };
@@ -492,84 +432,35 @@ export default function Home({ params }: { params: { transactions: string } }) {
     setLoading(true);
     try {
       const query = supabase
-        .from("transactions")
+        .from("providers")
         .select("*")
+        .eq("type", "sub_finances")
         .eq("status", "active");
 
-      if (params.transactions) {
-        query.eq("provider_id", params.transactions);
+      if (params.provider) {
+        query.eq("provider_id", params.provider);
       }
 
-      if (paramsFilters.type) {
-        query.eq("type", paramsFilters.type);
+      if (paramsFilters.description) {
+        query.ilike("description", `%${paramsFilters.description}%`);
       }
 
-      if (paramsFilters.from || paramsFilters.to) {
-        query
-          .gt(
-            "created_at",
-            dayjs(paramsFilters.from)
-              .startOf("day")
-              .format("YYYY-MM-DD HH:mm:ss")
-          )
-          .lt(
-            "created_at",
-            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD HH:mm:ss")
-          );
+      if (paramsFilters.name) {
+        query.ilike("name", `%${paramsFilters.name}%`);
       }
 
       if (paramsFilters.id) {
         query.eq("id", paramsFilters.id);
       }
 
-      const { data: users, error } = await query.order("id", {
+      const { data: providers, error } = await query.order("id", {
         ascending: false,
       });
 
       setLoading(false);
       if (error) console.log("error", error);
       else {
-        setCreditAmount(
-          users
-            .map((ele) => {
-              if (ele.type === "Credit") {
-                return ele.amount;
-              }
-            })
-            .filter((ele) => ele)
-            .reduce((ele, a: any) => ele + a, 0)
-        );
-        setCashAmount(
-          users
-            .map((ele) => {
-              if (ele.type === "Cash") {
-                return ele.amount;
-              }
-            })
-            .filter((ele) => ele)
-            .reduce((ele, a: any) => ele + a, 0)
-        );
-
-        setChargeAmount(
-          users
-            .map((ele) => {
-              if (ele.type === "Charge") {
-                return ele.amount;
-              }
-            })
-            .filter((ele) => ele)
-            .reduce((ele, a: any) => ele + a, 0)
-        );
-
-        setPayload(users);
-        setExportData(
-          users.map((ele) => ({
-            type: ele.type,
-            amount: ele.amount,
-            charge: ele.charge,
-            date: dayjs(ele.created_at).format("DD MMM hh:mm a"),
-          }))
-        );
+        setPayload(providers);
       }
     } catch (error) {
       setLoading(false);
@@ -585,9 +476,10 @@ export default function Home({ params }: { params: { transactions: string } }) {
   return (
     <main className={styles.main}>
       {contextHolder}
+
       <Card
         bordered={false}
-        title={`Provider ${params.transactions}`}
+        title="Providers"
         extra={
           <Space>
             <Button
@@ -598,61 +490,32 @@ export default function Home({ params }: { params: { transactions: string } }) {
                   style={{ marginRight: 5 }}
                 />
               }
-              onClick={() => router.push("/dashboard/providers")}
+              onClick={() => router.push("/dashboard/finances")}
             >
-              Back to providers
+              Back to finances
             </Button>
-
             <Button
               type="primary"
               icon={
-                <FontAwesomeIcon icon={faRuler} style={{ marginRight: 5 }} />
+                <FontAwesomeIcon
+                  icon={faMoneyBill}
+                  style={{ marginRight: 5 }}
+                />
               }
               onClick={() => setOpen(true)}
             >
-              New transaction
+              New sub provider
             </Button>
-
             <Button
               type="ghost"
               loading={loading}
               disabled={loading}
-              onClick={() => {}}
+              onClick={getAllData}
             >
               Refresh
             </Button>
-
-            <ExportToExcel
-              apiData={exportData}
-              fileName={`provider ${params.transactions}`}
-            />
           </Space>
         }
-        actions={[
-          <Space key={1}>
-            <Statistic
-              title="Total Credit"
-              value={creditAmount}
-              style={{ marginLeft: 10, marginRight: 10 }}
-              valueStyle={{ color: "#531DAB" }}
-              prefix="$"
-            />
-            <Statistic
-              title="Total Cash"
-              value={cashAmount}
-              style={{ marginLeft: 10, marginRight: 10 }}
-              valueStyle={{ color: "#2439C4" }}
-              prefix="$"
-            />
-            <Statistic
-              title="Total Charge"
-              value={chargeAmount}
-              style={{ marginLeft: 10, marginRight: 10 }}
-              valueStyle={{ color: "#C9348A" }}
-              prefix="$"
-            />
-          </Space>,
-        ]}
       >
         <Table
           rowKey="id"
@@ -664,7 +527,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
       </Card>
 
       <Drawer
-        title="New transaction"
+        title="New provider"
         placement="right"
         onClose={() => setOpen(false)}
         open={open}
@@ -677,17 +540,16 @@ export default function Home({ params }: { params: { transactions: string } }) {
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
         >
-          <Form.Item name="type" label="Type" rules={[{ required: true }]}>
-            <Select>
-              <Select.Option value="Credit">Credit</Select.Option>
-              <Select.Option value="Cash">Cash</Select.Option>
-              <Select.Option value="Charge">Charge</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
+          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
           <Form.Item>
             <Space>
               <SubmitButton form={form} />

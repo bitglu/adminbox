@@ -507,11 +507,11 @@ export default function Home({ params }: { params: { transactions: string } }) {
             "created_at",
             dayjs(paramsFilters.from)
               .startOf("day")
-              .format("YYYY-MM-DD hh:mm:ss")
+              .format("YYYY-MM-DD HH:mm:ss")
           )
           .lt(
             "created_at",
-            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD hh:mm:ss")
+            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD HH:mm:ss")
           );
       }
 
@@ -573,7 +573,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
                   style={{ marginRight: 5 }}
                 />
               }
-              onClick={() => router.push("/dashboard/finances")}
+              onClick={() => router.back()}
             >
               Back to finances
             </Button>
