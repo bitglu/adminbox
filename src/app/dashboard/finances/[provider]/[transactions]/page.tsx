@@ -37,7 +37,13 @@ import {
   faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import type { ColumnType, ColumnsType, TableProps } from "antd/es/table";
 import { ProjectZonesDataFaker } from "@/services/data";
@@ -71,6 +77,8 @@ import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { TransactionsDatabase } from "@/services/supabase/schemas/transactions.schema";
 import dayjs from "dayjs";
 import { FilterConfirmProps } from "antd/es/table/interface";
+import InvoiceFinance from "@/components/pdf/finances_table/InvoiceFinance";
+import { PDFViewer } from "@react-pdf/renderer";
 type TransactionsDatabaseType =
   TransactionsDatabase["public"]["Tables"]["transactions"]["Row"];
 
@@ -119,6 +127,8 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const [form] = Form.useForm();
   const [typeForm, setTypeForm] = useState<any>(null);
   const [messageApi, contextHolder] = message.useMessage();
+
+  const [showReportPdf, setshowReportPdf] = useState(false);
 
   const supabase = useSupabaseClient<TransactionsDatabase>();
 
@@ -595,10 +605,18 @@ export default function Home({ params }: { params: { transactions: string } }) {
             >
               Refresh
             </Button>
-            <ExportToExcel
-              apiData={exportData}
-              fileName={`Finance ${params.transactions}`}
-            />
+            <Button
+              type="ghost"
+              loading={loading}
+              disabled={loading}
+              onClick={() => {
+                !showReportPdf
+                  ? setshowReportPdf(true)
+                  : setshowReportPdf(false);
+              }}
+            >
+              {showReportPdf ? "Hide report" : "Show report"}
+            </Button>
           </Space>
         }
         actions={[
@@ -613,13 +631,15 @@ export default function Home({ params }: { params: { transactions: string } }) {
           </Space>,
         ]}
       >
-        <Table
-          rowKey="id"
-          loading={loading}
-          columns={columns}
-          dataSource={payload}
-          onChange={onChangeTable}
-        />
+        {!showReportPdf && (
+          <Table
+            rowKey="id"
+            loading={loading}
+            columns={columns}
+            dataSource={payload}
+            onChange={onChangeTable}
+          />
+        )}
       </Card>
 
       <Drawer
@@ -654,6 +674,14 @@ export default function Home({ params }: { params: { transactions: string } }) {
           </Form.Item>
         </Form>
       </Drawer>
+
+      {showReportPdf && (
+        <Fragment>
+          <PDFViewer width="1000" height="600" className="app">
+            <InvoiceFinance invoice={payload} />
+          </PDFViewer>
+        </Fragment>
+      )}
     </main>
   );
 }

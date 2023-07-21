@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const Invoice = ({ invoice }: any) => (
+const InvoiceFinance = ({ invoice }: any) => (
   <Document>
     <Page size="A4" style={styles.page}>
       {/* <Image
@@ -42,4 +42,4 @@ const Invoice = ({ invoice }: any) => (
   </Document>
 );
 
-export default Invoice;
+export default InvoiceFinance;
