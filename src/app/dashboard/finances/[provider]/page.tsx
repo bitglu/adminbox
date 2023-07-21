@@ -35,13 +35,63 @@ import {
   faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import type { ColumnType, ColumnsType, TableProps } from "antd/es/table";
 import { ProjectDataFaker } from "@/services/data";
 import { useRouter } from "next/navigation";
 
 const { Paragraph } = Typography;
+
+const invoiceData = {
+  id: "5df3180a09ea16dc4b95f910",
+  invoice_no: "201906-28",
+  balance: "$2,283.74",
+  company: "MANTRIX",
+  email: "susanafuentes@mantrix.com",
+  phone: "+1 (872) 588-3809",
+  address: "922 Campus Road, Drytown, Wisconsin, 1986",
+  trans_date: "2019-09-12",
+  due_date: "2019-10-12",
+  items: [
+    {
+      sno: 1,
+      desc: "ad sunt culpa occaecat qui",
+      qty: 5,
+      rate: 405.89,
+    },
+    {
+      sno: 2,
+      desc: "cillum quis sunt qui aute",
+      qty: 5,
+      rate: 373.11,
+    },
+    {
+      sno: 3,
+      desc: "ea commodo labore culpa irure",
+      qty: 5,
+      rate: 458.61,
+    },
+    {
+      sno: 4,
+      desc: "nisi consequat et adipisicing dolor",
+      qty: 10,
+      rate: 725.24,
+    },
+    {
+      sno: 5,
+      desc: "proident cillum anim elit esse",
+      qty: 4,
+      rate: 141.02,
+    },
+  ],
+};
 
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
@@ -53,6 +103,8 @@ type ProvidersDatabaseType =
 
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import { PDFViewer } from "@react-pdf/renderer";
+import Invoice from "@/components/pdf/table/invoice";
 const ExportToExcel = ({ apiData, fileName }: any) => {
   const fileType =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -105,6 +157,9 @@ export default function Home({ params }: { params: { provider: string } }) {
   const [form] = Form.useForm();
   const [typeForm, setTypeForm] = useState<any>(null);
   const [messageApi, contextHolder] = message.useMessage();
+
+  const [dataExportPdf, setdataExportPdf] = useState([]);
+  const [showReportPdf, setshowReportPdf] = useState(false);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -582,6 +637,8 @@ export default function Home({ params }: { params: { provider: string } }) {
             (ele: any) => ele.id === element.provider_id
           )[0].name,
           [date]: element.amount,
+          month: date,
+          amount: element.amount,
         });
       } else {
         const existTypeInArray = dataToExcel.findIndex(
@@ -593,10 +650,18 @@ export default function Home({ params }: { params: { provider: string } }) {
         );
 
         if (dataToExcel[existTypeInArray]) {
-          if (dataToExcel[existTypeInArray][date]) {
-            dataToExcel[existTypeInArray][date] += element.amount;
+          if (dataToExcel[existTypeInArray].month === date) {
+            dataToExcel[existTypeInArray].amount += element.amount;
           } else {
-            dataToExcel[existTypeInArray][date] = element.amount;
+            dataToExcel.push({
+              provider: providersFilter.filter(
+                (ele: any) => ele.id === element.provider_id
+              )[0].name,
+              [date]: element.amount,
+              month: date,
+              amount: element.amount,
+            });
+            //dataToExcel[existTypeInArray][date] = element.amount;
           }
         } else {
           dataToExcel.push({
@@ -604,10 +669,18 @@ export default function Home({ params }: { params: { provider: string } }) {
               (ele: any) => ele.id === element.provider_id
             )[0].name,
             [date]: element.amount,
+            month: date,
+            amount: element.amount,
           });
         }
       }
     });
+
+    console.log(dataToExcel);
+
+    setdataExportPdf(dataToExcel);
+    setshowReportPdf(true);
+    return;
 
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
@@ -671,21 +744,27 @@ export default function Home({ params }: { params: { provider: string } }) {
               type="ghost"
               loading={loading}
               disabled={loading}
-              onClick={getAllReportByExcel}
+              onClick={() => {
+                !showReportPdf
+                  ? getAllReportByExcel()
+                  : setshowReportPdf(false);
+              }}
             >
-              Export
+              {showReportPdf ? "Hide report" : "Show report"}
             </Button>
           </Space>
         }
       >
-        <Table
-          rowKey="id"
-          rowSelection={rowSelection}
-          loading={loading}
-          columns={columns}
-          dataSource={payload}
-          onChange={onChangeTable}
-        />
+        {!showReportPdf && (
+          <Table
+            rowKey="id"
+            rowSelection={rowSelection}
+            loading={loading}
+            columns={columns}
+            dataSource={payload}
+            onChange={onChangeTable}
+          />
+        )}
       </Card>
 
       <Drawer
@@ -720,6 +799,14 @@ export default function Home({ params }: { params: { provider: string } }) {
           </Form.Item>
         </Form>
       </Drawer>
+
+      {showReportPdf && (
+        <Fragment>
+          <PDFViewer width="1000" height="600" className="app">
+            <Invoice invoice={dataExportPdf} />
+          </PDFViewer>
+        </Fragment>
+      )}
     </main>
   );
 }
