@@ -47,8 +47,29 @@ const { Paragraph } = Typography;
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { ProvidersDatabase } from "@/services/supabase/schemas/providers.schema";
 import { FilterConfirmProps } from "antd/es/table/interface";
+import dayjs from "dayjs";
 type ProvidersDatabaseType =
   ProvidersDatabase["public"]["Tables"]["providers"]["Row"];
+
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
+const ExportToExcel = ({ apiData, fileName }: any) => {
+  const fileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const fileExtension = ".xlsx";
+
+  const exportToCSV = (apiData: any, fileName: any) => {
+    const ws = XLSX.utils.json_to_sheet(apiData());
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(data, fileName + fileExtension);
+  };
+
+  return (
+    <Button onClick={(e) => exportToCSV(apiData(), fileName)}>Export</Button>
+  );
+};
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
   const [submittable, setSubmittable] = React.useState(false);
@@ -271,7 +292,9 @@ export default function Home({ params }: { params: { provider: string } }) {
       render: (text) => (
         <Button
           type="link"
-          onClick={() => router.push(`/dashboard/finances/${params.provider}/${text}`)}
+          onClick={() =>
+            router.push(`/dashboard/finances/${params.provider}/${text}`)
+          }
           style={{ cursor: "pointer" }}
         >
           {text.toString()}
@@ -286,7 +309,9 @@ export default function Home({ params }: { params: { provider: string } }) {
       render: (text, record) => (
         <Paragraph
           copyable
-          onClick={() => router.push(`/dashboard/finances/${params.provider}/${record.id}`)}
+          onClick={() =>
+            router.push(`/dashboard/finances/${params.provider}/${record.id}`)
+          }
           style={{ cursor: "pointer" }}
         >
           <Button type="link">{text.toString()}</Button>
@@ -301,7 +326,9 @@ export default function Home({ params }: { params: { provider: string } }) {
       render: (text, record) => (
         <Paragraph
           copyable
-          onClick={() => router.push(`/dashboard/finances/${params.provider}/${record.id}`)}
+          onClick={() =>
+            router.push(`/dashboard/finances/${params.provider}/${record.id}`)
+          }
           style={{ cursor: "pointer" }}
         >
           {text.toString()}
@@ -391,7 +418,11 @@ export default function Home({ params }: { params: { provider: string } }) {
       } else {
         const { data: provider, error } = await supabase
           .from("providers")
-          .insert({ ...values, type: "sub_finances", provider_id: params.provider })
+          .insert({
+            ...values,
+            type: "sub_finances",
+            provider_id: params.provider,
+          })
           .select()
           .single();
 
@@ -467,6 +498,68 @@ export default function Home({ params }: { params: { provider: string } }) {
     }
   }, [paramsFilters]);
 
+  const getAllReportByExcel = useCallback(async () => {
+    const providersFilter = payload.map((ele: any) => ({
+      id: ele.id,
+      name: ele.name,
+    }));
+    let { data: data, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .in(
+        "provider_id",
+        providersFilter.map((ele: any) => ele.id)
+      );
+
+    const dataToExcel: any = [];
+
+    data?.forEach((element) => {
+      const date = dayjs(element.created_at).format("MMM");
+
+      if (dataToExcel.length <= 0) {
+        dataToExcel.push({
+          provider: providersFilter.filter(
+            (ele: any) => ele.id === element.provider_id
+          )[0].name,
+          [date]: element.amount,
+        });
+      } else {
+        const existTypeInArray = dataToExcel.findIndex(
+          (ele: any) =>
+            ele.provider ===
+            providersFilter.filter(
+              (ele: any) => ele.id === element.provider_id
+            )[0].name
+        );
+
+        if (dataToExcel[existTypeInArray]) {
+          if (dataToExcel[existTypeInArray][date]) {
+            dataToExcel[existTypeInArray][date] += element.amount;
+          } else {
+            dataToExcel[existTypeInArray][date] = element.amount;
+          }
+        } else {
+          dataToExcel.push({
+            provider: providersFilter.filter(
+              (ele: any) => ele.id === element.provider_id
+            )[0].name,
+            [date]: element.amount,
+          });
+        }
+      }
+    });
+
+    const fileType =
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+
+    const ws = XLSX.utils.json_to_sheet(dataToExcel);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const dataExcelSend = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataExcelSend, "ExportAll" + fileExtension);
+  }, [payload]);
+
   useEffect(() => {
     getAllData();
 
@@ -513,6 +606,14 @@ export default function Home({ params }: { params: { provider: string } }) {
               onClick={getAllData}
             >
               Refresh
+            </Button>
+            <Button
+              type="ghost"
+              loading={loading}
+              disabled={loading}
+              onClick={getAllReportByExcel}
+            >
+              Export
             </Button>
           </Space>
         }
