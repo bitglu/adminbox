@@ -115,6 +115,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
 
   const [creditAmount, setCreditAmount] = useState(0);
   const [cashAmount, setCashAmount] = useState(0);
+  const [chargeAmount, setChargeAmount] = useState(0);
 
   const [form] = Form.useForm();
   const [typeForm, setTypeForm] = useState<any>(null);
@@ -560,6 +561,13 @@ export default function Home({ params }: { params: { transactions: string } }) {
             .reduce((ele, a: any) => ele + a, 0)
         );
 
+        setChargeAmount(
+          users
+            .map((ele) => ele.charge)
+            .filter((ele) => ele)
+            .reduce((ele, a: any) => ele + a, 0)
+        );
+
         setPayload(users);
         setExportData(
           users.map((ele) => ({
@@ -641,6 +649,13 @@ export default function Home({ params }: { params: { transactions: string } }) {
               value={cashAmount}
               style={{ marginLeft: 10, marginRight: 10 }}
               valueStyle={{ color: "#531DAB" }}
+              prefix="$"
+            />
+            <Statistic
+              title="Total Charge"
+              value={chargeAmount}
+              style={{ marginLeft: 10, marginRight: 10 }}
+              valueStyle={{ color: "#4CD48D" }}
               prefix="$"
             />
           </Space>,
