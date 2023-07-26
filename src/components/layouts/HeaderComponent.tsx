@@ -31,7 +31,7 @@ const HeaderComponent = () => {
           >
             A
           </Avatar>
-          <Text>Hi!, AdminBox</Text>
+          <Text>Hi!, SuperService</Text>
         </div>
 
         <div>

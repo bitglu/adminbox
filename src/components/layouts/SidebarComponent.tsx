@@ -28,7 +28,7 @@ const SidebarComponent = () => {
       }}
     >
       <div className="logo">
-        <Image src="https://i.pinimg.com/originals/77/44/80/7744806c7e15d502830a1fdd8e2a37e9.gif" alt="VM" width={100} height={100} />
+        <Image src="/logo.jpeg" alt="VM" width={100} height={100} />
       </div>
       <Menu
         theme="light"

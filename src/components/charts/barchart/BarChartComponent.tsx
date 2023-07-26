@@ -98,9 +98,9 @@ const MyResponsiveBar = () => (
       },
     ]}
     role="application"
-    ariaLabel="AdminBox"
+    ariaLabel="SuperService"
     barAriaLabel={function (e: any) {
-      return e.id + ": " + e.formattedValue + " in AdminBox: " + e.indexValue;
+      return e.id + ": " + e.formattedValue + " in SuperService: " + e.indexValue;
     }}
   />
 );

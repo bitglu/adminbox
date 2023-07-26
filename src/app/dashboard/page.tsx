@@ -65,7 +65,7 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <div style={{ textAlign: "center", marginBottom: "3%" }}>
+     {/*  <div style={{ textAlign: "center", marginBottom: "3%" }}>
         <Space size={100} align="center">
           {STATISTIC_ITEMS.map((ele) => (
             <Card bordered={false} key={ele.name}>
@@ -80,9 +80,9 @@ export default function Home() {
             </Card>
           ))}
         </Space>
-      </div>
+      </div> */}
 
-      <Row gutter={16} style={{ marginTop: "1%" }}>
+    {/*   <Row gutter={16} style={{ marginTop: "1%" }}>
         <Col span={12}>
           <Card bordered={false} title="Projects growth">
             <div style={{ height: 400, width: "100%" }}>
@@ -97,7 +97,7 @@ export default function Home() {
             </div>
           </Card>
         </Col>
-      </Row>
+      </Row> */}
     </main>
   );
 }

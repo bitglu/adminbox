@@ -228,13 +228,13 @@ export default function Home() {
                       <Image
                         width={200}
                         height={150}
-                        alt="Text AdminBox"
+                        alt="Text SuperService"
                         src="https://www.latercera.com/resizer/SbYYoV02jTaqyeWEVBI0Fr9Ttwo=/900x600/smart/cloudfront-us-east-1.images.arcpublishing.com/copesa/NMBIFI2K2RAJTCEUWCW2HQVFIA.jpg"
                       />
                       <Image
                         width={200}
                         height={150}
-                        alt="Text AdminBox"
+                        alt="Text SuperService"
                         src="https://www.revistainteriores.es/uploads/s1/79/35/27/istock-1016102754.jpeg"
                       />
                     </Image.PreviewGroup>

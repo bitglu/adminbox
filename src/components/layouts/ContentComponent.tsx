@@ -22,7 +22,7 @@ const ContentComponent = ({ children }: { children: React.ReactNode }) => {
         </div>
       </Content>
       <Footer style={{ textAlign: "center" }}>
-        AdminBox ©2023 Created by{" "}
+        SuperService ©2023 Created by{" "}
         <a href="https://bitglu.net/" target="_blank" rel="noreferrer">
           Bitglu
         </a>
