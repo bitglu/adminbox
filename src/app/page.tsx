@@ -117,13 +117,13 @@ export default function Home() {
                       <img
                         src="2.jpeg"
                         alt="Feature 01"
-                        style={{width: 400, height: 300}}
+                        style={{ width: 400, height: 300 }}
                       />
                     </div>
                     <h4 className="feature-title mt-24">
                       Auto Repair Services
                     </h4>
-                    <p className="text-sm mb-0">
+                    <p className="text-sm mb-0" style={{ color: "#FFF" }}>
                       Contact Mobile Super Service for all your auto repair
                       service requirements. From brake repairs to engine
                       services, our ASE-certified technicians can handle
@@ -139,13 +139,13 @@ export default function Home() {
                       <img
                         src="1.jpeg"
                         alt="Feature 02"
-                        style={{width: 400, height: 300}}
+                        style={{ width: 400, height: 300 }}
                       />
                     </div>
                     <h4 className="feature-title mt-24">
                       Car Audio and Security Systems
                     </h4>
-                    <p className="text-sm mb-0">
+                    <p className="text-sm mb-0" style={{ color: "#FFF" }}>
                       Reach out to our car stereo store for all your audio and
                       safety device needs. We sell and install a variety of
                       electronic devices at affordable prices. We offer products
