@@ -36,7 +36,12 @@ const HeaderComponent = () => {
 
         <div>
           <Button type="ghost" shape="circle" icon={<BellOutlined />} />
-          <Button type="ghost" shape="circle" icon={<LogoutOutlined />} />
+          <Button
+            type="ghost"
+            shape="circle"
+            icon={<LogoutOutlined />}
+            onClick={() => router.push("/")}
+          />
         </div>
       </div>
     </Header>
