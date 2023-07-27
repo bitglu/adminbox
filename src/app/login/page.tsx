@@ -25,8 +25,16 @@ export default function Login() {
   };
 
   const handleSignIn = async (values: { email: string; password: string }) => {
-    const response = await supabase.auth.signInWithPassword(values);
-    router.push("/dashboard");
+    try {
+      const response = await supabase.auth.signInWithPassword(values);
+      if (response.error) {
+        alert("Error with credentials");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.log("🚀 ~ file: page.tsx:32 ~ handleSignIn ~ error:", error);
+    }
   };
 
   const handleSignOut = async () => {
@@ -74,7 +82,7 @@ export default function Login() {
           height: "100vh",
           display: "flex",
           justifyContent: "center",
-          alignItems: 'center'
+          alignItems: "center",
         }}
       >
         <Card style={{ width: 400, height: 200 }}>
