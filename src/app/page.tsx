@@ -51,7 +51,7 @@ export default function Home() {
                   Warranties Are Available
                 </p>
                 <div className="hero-cta">
-                  <a className="button button-primary" href="/dashboard">
+                  <a className="button button-primary" href="/login">
                     Go to Superservice
                   </a>
                 </div>
