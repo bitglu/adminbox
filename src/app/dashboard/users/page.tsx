@@ -384,7 +384,11 @@ export default function Home() {
         setOpen(false);
         getAllData();
       } else {
-        const { data: user, error } = await supabase
+        let { data, error } = await supabase.auth.signUp({
+          email: values.email,
+          password: values.password,
+        });
+        const { data: user } = await supabase
           .from("users")
           .insert(values)
           .select()
@@ -552,7 +556,11 @@ export default function Home() {
           <Form.Item name="name" label="Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="email" label="Email" rules={[{ required: true }]}>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[{ required: true, type: "email" }]}
+          >
             <Input />
           </Form.Item>
 
