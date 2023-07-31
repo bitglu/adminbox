@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import "./page.module.css";
-import "./style.css";
+import "../page.module.css";
+import "../style.css";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -24,7 +24,7 @@ export default function Home() {
           <div className="site-header-inner">
             <div className="brand header-brand">
               <h1 className="m-0">
-                <a href="#">
+                <a href="/">
                   <img
                     className="header-logo-image"
                     src="logo.jpeg"
@@ -111,50 +111,45 @@ export default function Home() {
           <div className="container">
             <div className="features-inner section-inner has-bottom-divider">
               <div className="features-wrap">
-                <div className="feature text-center is-revealing">
-                  <div className="feature-inner">
-                    <div className="feature-icon">
-                      <img
-                        src="2.jpeg"
-                        alt="Feature 01"
-                        style={{ width: 400, height: 300 }}
-                      />
-                    </div>
-                    <h4 className="feature-title mt-24">
-                      <a href="/auto-services">Auto Repair Services</a>
-                    </h4>
-                    <p className="text-sm mb-0" style={{ color: "#FFF" }}>
-                      Contact Mobile Super Service for all your auto repair
-                      service requirements. From brake repairs to engine
-                      services, our ASE-certified technicians can handle
-                      everything. We offer fast services and quick turnaround
-                      times on estimates. Visit us today!
-                    </p>
+                <div className="feature-inner">
+                  <div className="feature-icon">
+                    <img
+                      src="1.jpeg"
+                      alt="Feature 01"
+                      style={{ width: 600, height: 400 }}
+                    />
                   </div>
-                </div>
+                  <h4 className="feature-title mt-24">
+                    Complete Electronic and Audio Solutions for Your Vehicle
+                  </h4>
 
-                <div className="feature text-center is-revealing">
-                  <div className="feature-inner">
-                    <div className="feature-icon">
-                      <img
-                        src="1.jpeg"
-                        alt="Feature 02"
-                        style={{ width: 400, height: 300 }}
-                      />
-                    </div>
-                    <h4 className="feature-title mt-24">
-                      <a href="/car-electronics">
-                        Car Audio and Security Systems
-                      </a>
-                    </h4>
-                    <p className="text-sm mb-0" style={{ color: "#FFF" }}>
-                      Reach out to our car stereo store for all your audio and
-                      safety device needs. We sell and install a variety of
-                      electronic devices at affordable prices. We offer products
-                      and services nationwide. Contact us today! We return your
-                      calls or e-mails on the same day.
-                    </p>
-                  </div>
+                  <p className="text-sm mb-0" style={{ color: "#FFF" }}>
+                    Upgrade your vehicle with some of the latest technologies on
+                    the market! Mobile Super Service carries stereos, alarms,
+                    lighting, and more from all the top brands you know, love,
+                    and trust.
+                  </p>
+
+                  <br />
+
+                  <p className="text-sm mb-0" style={{ color: "#FFF" }}>
+                    Count on our experienced technicians to provide quality
+                    products and installation services. Get in touch with us for
+                    more details on our WARRANTIES.
+                  </p>
+
+                  <br />
+
+                  <h4 className="feature-title mt-24">
+                    Top-Quality Accessories for Your Car
+                  </h4>
+                  <ul>
+                    <li>Radios</li>
+                    <li>Car alarms</li>
+                    <li>Accessories</li>
+                    <li>Remote starters</li>
+                    <li>Lighting devices</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -237,16 +232,6 @@ export default function Home() {
             </div>
           </div>
         </section> */}
-
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2569.6852675611863!2d-93.60619911164976!3d41.58294056418911!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87ee984b8f2f82f7%3A0x8603efec0678b598!2s605%20Scott%20Ave%2C%20Des%20Moines%2C%20IA%2050309%2C%20EE.%20UU.!5e0!3m2!1ses-419!2scl!4v1690768354499!5m2!1ses-419!2scl"
-          width="600"
-          style={{
-            width: "100%",
-          }}
-          height="450"
-          loading="lazy"
-        ></iframe>
       </main>
 
       <footer className="site-footer">

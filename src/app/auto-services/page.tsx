@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { Inter } from "next/font/google";
-import "./page.module.css";
-import "./style.css";
+import "../page.module.css";
+import "../style.css";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -24,7 +24,7 @@ export default function Home() {
           <div className="site-header-inner">
             <div className="brand header-brand">
               <h1 className="m-0">
-                <a href="#">
+                <a href="/">
                   <img
                     className="header-logo-image"
                     src="logo.jpeg"
@@ -111,50 +111,64 @@ export default function Home() {
           <div className="container">
             <div className="features-inner section-inner has-bottom-divider">
               <div className="features-wrap">
-                <div className="feature text-center is-revealing">
-                  <div className="feature-inner">
-                    <div className="feature-icon">
-                      <img
-                        src="2.jpeg"
-                        alt="Feature 01"
-                        style={{ width: 400, height: 300 }}
-                      />
-                    </div>
-                    <h4 className="feature-title mt-24">
-                      <a href="/auto-services">Auto Repair Services</a>
-                    </h4>
-                    <p className="text-sm mb-0" style={{ color: "#FFF" }}>
-                      Contact Mobile Super Service for all your auto repair
-                      service requirements. From brake repairs to engine
-                      services, our ASE-certified technicians can handle
-                      everything. We offer fast services and quick turnaround
-                      times on estimates. Visit us today!
-                    </p>
+                <div className="feature-inner">
+                  <div className="feature-icon">
+                    <img
+                      src="2.jpeg"
+                      alt="Feature 01"
+                      style={{ width: 800, height: 400 }}
+                    />
                   </div>
-                </div>
+                  <h4 className="feature-title mt-24">
+                    Your One-Stop Shop for Auto Repair Services
+                  </h4>
+                  <p className="text-sm mb-0" style={{ color: "#FFF" }}>
+                    Are you looking for experienced professionals to repair your
+                    vehicle? Visit Mobile Super Service to get superior auto
+                    services. From wheels and tires to engine swaps, brakes,
+                    audio and more, our ASE Certified technicians can handle all
+                    your auto service needs quickly and affordably.
+                  </p>
 
-                <div className="feature text-center is-revealing">
-                  <div className="feature-inner">
-                    <div className="feature-icon">
-                      <img
-                        src="1.jpeg"
-                        alt="Feature 02"
-                        style={{ width: 400, height: 300 }}
-                      />
-                    </div>
-                    <h4 className="feature-title mt-24">
-                      <a href="/car-electronics">
-                        Car Audio and Security Systems
-                      </a>
-                    </h4>
-                    <p className="text-sm mb-0" style={{ color: "#FFF" }}>
-                      Reach out to our car stereo store for all your audio and
-                      safety device needs. We sell and install a variety of
-                      electronic devices at affordable prices. We offer products
-                      and services nationwide. Contact us today! We return your
-                      calls or e-mails on the same day.
-                    </p>
-                  </div>
+                  <br />
+                  <br />
+
+                  <p className="text-sm mb-0" style={{ color: "#FFF" }}>
+                    We are a family-owned business, providing quality auto
+                    repairs for over 25 years. We also work with insurance
+                    companies and our staff can assist you with your paperwork.
+                  </p>
+
+                  <br />
+                  <br />
+
+                  <h4 className="feature-title mt-24">
+                    Auto Maintenance and Repair Services
+                  </h4>
+                  <ul>
+                    <li>Auto repairs</li>
+                    <li>Wheel services</li>
+                    <li>Tire services</li>
+                    <li>Alternator checking</li>
+                    <li>Battery testing</li>
+                    <li>Engine swaps</li>
+                    <li>All electrical work</li>
+                    <li>Brake services</li>
+                    <li>Audio system installation and repair</li>
+                    <li>Remote starter installation</li>
+                    <li>GPS tracking device installation</li>
+                    <li>Ignition interlock device installation</li>
+                    <li>Intoxalock installation</li>
+                    <li>Lighting device installation and more</li>
+                  </ul>
+
+                  <br />
+                  <br />
+
+                  <p className="text-sm mb-0" style={{ color: "#FFF" }}>
+                    Stop by our auto shop for any auto service you need. FREE
+                    Wi-Fi is available!
+                  </p>
                 </div>
               </div>
             </div>
@@ -237,16 +251,6 @@ export default function Home() {
             </div>
           </div>
         </section> */}
-
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2569.6852675611863!2d-93.60619911164976!3d41.58294056418911!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87ee984b8f2f82f7%3A0x8603efec0678b598!2s605%20Scott%20Ave%2C%20Des%20Moines%2C%20IA%2050309%2C%20EE.%20UU.!5e0!3m2!1ses-419!2scl!4v1690768354499!5m2!1ses-419!2scl"
-          width="600"
-          style={{
-            width: "100%",
-          }}
-          height="450"
-          loading="lazy"
-        ></iframe>
       </main>
 
       <footer className="site-footer">
