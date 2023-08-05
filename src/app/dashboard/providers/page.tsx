@@ -265,10 +265,11 @@ export default function Home() {
       title: "# Code",
       dataIndex: "id",
       key: "id",
+
       ...getColumnSearchProps("id"),
       render: (text) => (
         <Button
-          type="link"
+          type="text"
           onClick={() => router.push(`/dashboard/providers/${text}`)}
           style={{ cursor: "pointer" }}
         >
@@ -287,7 +288,7 @@ export default function Home() {
           onClick={() => router.push(`/dashboard/providers/${record.id}`)}
           style={{ cursor: "pointer" }}
         >
-          <Button type="link">{text.toString()}</Button>
+          <Button type="text">{text.toString()}</Button>
         </Paragraph>
       ),
     },
@@ -505,6 +506,9 @@ export default function Home() {
           columns={columns}
           dataSource={payload}
           onChange={onChangeTable}
+          style={{
+            background: "#cad094",
+          }}
         />
       </Card>
 

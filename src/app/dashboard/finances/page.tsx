@@ -269,7 +269,7 @@ export default function Home() {
       ...getColumnSearchProps("id"),
       render: (text) => (
         <Button
-          type="link"
+          type="text"
           onClick={() => router.push(`/dashboard/finances/${text}`)}
           style={{ cursor: "pointer" }}
         >
@@ -288,7 +288,7 @@ export default function Home() {
           onClick={() => router.push(`/dashboard/finances/${record.id}`)}
           style={{ cursor: "pointer" }}
         >
-          <Button type="link">{text.toString()}</Button>
+          <Button type="text">{text.toString()}</Button>
         </Paragraph>
       ),
     },

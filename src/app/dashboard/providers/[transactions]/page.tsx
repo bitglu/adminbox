@@ -124,6 +124,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const [creditAmount, setCreditAmount] = useState(0);
   const [cashAmount, setCashAmount] = useState(0);
   const [chargeAmount, setChargeAmount] = useState(0);
+  const [chargeCheck, setChargeChecks] = useState(0);
 
   const [singleData, setsingleData] = useState({
     name: "",
@@ -320,6 +321,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
       title: "# Code",
       dataIndex: "id",
       key: "id",
+      className: "trBackground",
       ...getColumnSearchProps("id"),
       render: (text) => (
         <Typography.Paragraph copyable style={{ cursor: "pointer" }}>
@@ -583,6 +585,17 @@ export default function Home({ params }: { params: { transactions: string } }) {
             .reduce((ele, a: any) => ele + a, 0)
         );
 
+        setChargeChecks(
+          users
+            .map((ele) => {
+              if (ele.type === "Checks") {
+                return ele.amount;
+              }
+            })
+            .filter((ele) => ele)
+            .reduce((ele, a: any) => ele + a, 0)
+        );
+
         setPayload(users);
         setExportData(
           users.map((ele) => ({
@@ -662,23 +675,30 @@ export default function Home({ params }: { params: { transactions: string } }) {
           <Space key={1}>
             <Statistic
               title="Total Credit"
-              value={creditAmount}
+              value={Math.round(creditAmount * 100) / 100}
               style={{ marginLeft: 10, marginRight: 10 }}
               valueStyle={{ color: "#531DAB" }}
               prefix="$"
             />
             <Statistic
               title="Total Cash"
-              value={cashAmount}
+              value={Math.round(cashAmount * 100) / 100}
               style={{ marginLeft: 10, marginRight: 10 }}
               valueStyle={{ color: "#2439C4" }}
               prefix="$"
             />
             <Statistic
               title="Total Charge"
-              value={chargeAmount}
+              value={Math.round(chargeAmount * 100) / 100}
               style={{ marginLeft: 10, marginRight: 10 }}
               valueStyle={{ color: "#C9348A" }}
+              prefix="$"
+            />
+            <Statistic
+              title="Total Checks"
+              value={Math.round(chargeCheck * 100) / 100}
+              style={{ marginLeft: 10, marginRight: 10 }}
+              valueStyle={{ color: "#D6D9BD" }}
               prefix="$"
             />
           </Space>,
@@ -714,6 +734,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
               <Select.Option value="Credit">Credit</Select.Option>
               <Select.Option value="Cash">Cash</Select.Option>
               <Select.Option value="Charge">Charge</Select.Option>
+              <Select.Option value="Checks">Checks</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>

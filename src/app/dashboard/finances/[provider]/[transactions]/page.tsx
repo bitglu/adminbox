@@ -635,7 +635,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
           <Space key={1}>
             <Statistic
               title="Total"
-              value={cashAmount}
+              value={Math.round(cashAmount * 100) / 100}
               style={{ marginLeft: 10, marginRight: 10 }}
               valueStyle={{ color: "#7B56BE" }}
               prefix="$"
@@ -690,7 +690,11 @@ export default function Home({ params }: { params: { transactions: string } }) {
       {showReportPdf && (
         <Fragment>
           <PDFViewer width="1000" height="600" className="app">
-            <InvoiceFinance invoice={payload} title={singleData?.name} module="finances" />
+            <InvoiceFinance
+              invoice={payload}
+              title={singleData?.name}
+              module="finances"
+            />
           </PDFViewer>
         </Fragment>
       )}

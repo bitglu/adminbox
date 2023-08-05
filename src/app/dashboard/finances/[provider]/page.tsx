@@ -394,7 +394,7 @@ export default function Home({ params }: { params: { provider: string } }) {
       ...getColumnSearchProps("id"),
       render: (text) => (
         <Button
-          type="link"
+          type="text"
           onClick={() =>
             router.push(`/dashboard/finances/${params.provider}/${text}`)
           }
@@ -417,7 +417,7 @@ export default function Home({ params }: { params: { provider: string } }) {
           }
           style={{ cursor: "pointer" }}
         >
-          <Button type="link">{text.toString()}</Button>
+          <Button type="text">{text.toString()}</Button>
         </Paragraph>
       ),
     },
