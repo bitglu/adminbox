@@ -455,7 +455,7 @@ export default function Home() {
       setLoading(false);
       if (error) console.log("error", error);
       else {
-        setPayload(providers);
+        setPayload(providers.filter((ele) => ele.id !== 107));
       }
     } catch (error) {
       setLoading(false);
