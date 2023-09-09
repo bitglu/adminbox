@@ -28,7 +28,8 @@ const styles = StyleSheet.create({
 });
 
 const InvoiceTableBlankSpace = ({ rowsCount }: any) => {
-  const blankRows = Array(rowsCount).fill(0);
+  const blankRows = rowsCount ? new Array(rowsCount).fill(0) : [];
+  console.log("🚀 ~ file: InvoiceTableBlankSpace.tsx:32 ~ InvoiceTableBlankSpace ~ blankRows:", blankRows)
   const rows = blankRows.map((x, i) => (
     <View style={styles.row} key={`BR${i}`}>
       <Text style={styles.description}>-</Text>

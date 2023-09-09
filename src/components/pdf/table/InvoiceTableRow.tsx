@@ -38,7 +38,7 @@ const InvoiceTableRow = ({ items }: any) => {
     <View style={styles.row} key={item.provider}>
       <Text style={styles.description}>{item.provider}</Text>
       <Text style={styles.qty}>{item.month}</Text>
-      <Text style={styles.amount}>{item.amount}</Text>
+      <Text style={styles.amount}>{Math.round(item.amount * 100) / 100}</Text>
     </View>
   ));
   return <Fragment>{rows}</Fragment>;
