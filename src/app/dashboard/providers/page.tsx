@@ -474,7 +474,7 @@ export default function Home() {
 
       <Card
         bordered={false}
-        title="Providers"
+        title="Parts Supplier"
         extra={
           <Space>
             <Button
