@@ -39,7 +39,7 @@ const InvoiceTableRow = ({ items }: any) => {
     <View style={styles.row} key={item.id}>
       <Text style={styles.description}>{item.type}</Text>
       <Text style={styles.qty}>
-        {dayjs(item.create_at).format("DD MMM hh:mm a")}
+        {dayjs(item.created_at).format("DD MMM hh:mm a")}
       </Text>
       <Text style={styles.amount}>
         {Number.parseFloat(item.amount).toFixed(2)}
