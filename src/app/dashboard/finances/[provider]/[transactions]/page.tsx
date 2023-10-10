@@ -122,7 +122,10 @@ export default function Home({ params }: { params: { transactions: string } }) {
   const [exportData, setExportData] = useState<any>([]);
   const [open, setOpen] = useState(false);
 
+  const [creditAmount, setCreditAmount] = useState(0);
   const [cashAmount, setCashAmount] = useState(0);
+  const [chargeAmount, setChargeAmount] = useState(0);
+  const [chargeCheck, setChargeChecks] = useState(0);
 
   const [singleData, setsingleData] = useState({
     name: "",
@@ -548,10 +551,42 @@ export default function Home({ params }: { params: { transactions: string } }) {
       setLoading(false);
       if (error) console.log("error", error);
       else {
+        setCreditAmount(
+          users
+            .map((ele) => {
+              if (ele.type === "Credit") {
+                return ele.amount;
+              }
+            })
+            .filter((ele) => ele)
+            .reduce((ele, a: any) => ele + a, 0)
+        );
         setCashAmount(
           users
             .map((ele) => {
               if (ele.type === "Cash") {
+                return ele.amount;
+              }
+            })
+            .filter((ele) => ele)
+            .reduce((ele, a: any) => ele + a, 0)
+        );
+
+        setChargeAmount(
+          users
+            .map((ele) => {
+              if (ele.type === "Charge") {
+                return ele.amount;
+              }
+            })
+            .filter((ele) => ele)
+            .reduce((ele, a: any) => ele + a, 0)
+        );
+
+        setChargeChecks(
+          users
+            .map((ele) => {
+              if (ele.type === "Checks") {
                 return ele.amount;
               }
             })
@@ -565,6 +600,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
           users.map((ele) => ({
             type: ele.type,
             amount: ele.amount,
+            charge: ele.charge,
             date: dayjs(ele.created_at).format("DD MMM hh:mm a"),
           }))
         );
@@ -634,10 +670,31 @@ export default function Home({ params }: { params: { transactions: string } }) {
         actions={[
           <Space key={1}>
             <Statistic
-              title="Total"
+              title="Total Credit"
+              value={Math.round(creditAmount * 100) / 100}
+              style={{ marginLeft: 10, marginRight: 10 }}
+              valueStyle={{ color: "#531DAB" }}
+              prefix="$"
+            />
+            <Statistic
+              title="Total Cash"
               value={Math.round(cashAmount * 100) / 100}
               style={{ marginLeft: 10, marginRight: 10 }}
-              valueStyle={{ color: "#7B56BE" }}
+              valueStyle={{ color: "#2439C4" }}
+              prefix="$"
+            />
+            <Statistic
+              title="Total Charge"
+              value={Math.round(chargeAmount * 100) / 100}
+              style={{ marginLeft: 10, marginRight: 10 }}
+              valueStyle={{ color: "#C9348A" }}
+              prefix="$"
+            />
+            <Statistic
+              title="Total Checks"
+              value={Math.round(chargeCheck * 100) / 100}
+              style={{ marginLeft: 10, marginRight: 10 }}
+              valueStyle={{ color: "#D6D9BD" }}
               prefix="$"
             />
           </Space>,

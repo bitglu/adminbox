@@ -58,6 +58,18 @@ const InvoiceTableFooter = ({ items, module }: any) => {
       0
     );
 
+  const checks = items
+    .map((item: any) => {
+      if (item.type === "Checks") {
+        return item.amount;
+      }
+    })
+    .filter((ele: any) => ele)
+    .reduce(
+      (accumulator: any, currentValue: any) => accumulator + currentValue,
+      0
+    );
+
   const credit = items
     .map((item: any) => {
       if (item.type === "Credit") {
@@ -71,28 +83,26 @@ const InvoiceTableFooter = ({ items, module }: any) => {
     );
   return (
     <>
-      {module !== "finances" && (
-        <View style={styles.row}>
-          <Text style={styles.description}>Credit</Text>
-          <Text style={styles.total}>
-            {Number.parseFloat(credit).toFixed(2)}
-          </Text>
-        </View>
-      )}
+      <View style={styles.row}>
+        <Text style={styles.description}>Credit</Text>
+        <Text style={styles.total}>{Number.parseFloat(credit).toFixed(2)}</Text>
+      </View>
 
       <View style={styles.row}>
         <Text style={styles.description}>Cash</Text>
         <Text style={styles.total}>{Number.parseFloat(cash).toFixed(2)}</Text>
       </View>
 
-      {module !== "finances" && (
-        <View style={styles.row}>
-          <Text style={styles.description}>Charge</Text>
-          <Text style={styles.total}>
-            {Number.parseFloat(charge).toFixed(2)}
-          </Text>
-        </View>
-      )}
+      <View style={styles.row}>
+        <Text style={styles.description}>Charge</Text>
+        <Text style={styles.total}>{Number.parseFloat(charge).toFixed(2)}</Text>
+      </View>
+
+      <View style={styles.row}>
+        <Text style={styles.description}>Checks</Text>
+        <Text style={styles.total}>{Number.parseFloat(checks).toFixed(2)}</Text>
+      </View>
+
       <View style={styles.row}>
         <Text style={styles.description}>TOTAL</Text>
         <Text style={styles.total}>{Number.parseFloat(total).toFixed(2)}</Text>
