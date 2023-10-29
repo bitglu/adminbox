@@ -4,6 +4,7 @@ import styles from "./page.module.css";
 import {
   Button,
   Card,
+  DatePicker,
   Drawer,
   Dropdown,
   Form,
@@ -219,6 +220,8 @@ export default function Home({ params }: { params: { provider: string } }) {
     id: null,
     name: null,
     description: null,
+    from: null,
+    to: null,
   });
 
   const handleMenuClick = (e: any, record: ProvidersDatabaseType) => {
@@ -594,6 +597,20 @@ export default function Home({ params }: { params: { provider: string } }) {
         query.eq("id", paramsFilters.id);
       }
 
+      if (paramsFilters.from || paramsFilters.to) {
+        query
+          .gt(
+            "created_at",
+            dayjs(paramsFilters.from)
+              .startOf("day")
+              .format("YYYY-MM-DD HH:mm:ss")
+          )
+          .lt(
+            "created_at",
+            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD HH:mm:ss")
+          );
+      }
+
       const { data: providers, error } = await query.order("id", {
         ascending: false,
       });
@@ -763,6 +780,15 @@ export default function Home({ params }: { params: { provider: string } }) {
             >
               {showReportPdf ? "Hide report" : "Show report"}
             </Button>
+            <DatePicker.RangePicker
+              onChange={(date: any, dateString: any) => {
+                setParamsFilters({
+                  ...paramsFilters,
+                  from: dateString[0],
+                  to: dateString[1],
+                });
+              }}
+            />
           </Space>
         }
       >
