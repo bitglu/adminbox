@@ -603,11 +603,11 @@ export default function Home({ params }: { params: { provider: string } }) {
             "created_at",
             dayjs(paramsFilters.from)
               .startOf("day")
-              .format("YYYY-MM-DD HH:mm:ss")
+              .format("YYYY-MM-DD 00:00:00")
           )
           .lt(
             "created_at",
-            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD HH:mm:ss")
+            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD 23:59:59")
           );
       }
 
