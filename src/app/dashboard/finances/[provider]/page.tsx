@@ -646,13 +646,29 @@ export default function Home({ params }: { params: { provider: string } }) {
       });
     }
 
-    let { data: data, error } = await supabase
+    let query = supabase
       .from("transactions")
       .select("*")
       .in(
         "provider_id",
         providersFilter.map((ele: any) => ele.id)
       );
+
+    if (paramsFilters.from || paramsFilters.to) {
+      query
+        .gt(
+          "created_at",
+          dayjs(paramsFilters.from).startOf("day").format("YYYY-MM-DD 00:00:00")
+        )
+        .lt(
+          "created_at",
+          dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD 23:59:59")
+        );
+    }
+
+    let { data: data, error } = await query.order("id", {
+      ascending: false,
+    });
 
     const dataToExcel: any = [];
 
@@ -704,12 +720,10 @@ export default function Home({ params }: { params: { provider: string } }) {
       }
     });
 
-    console.log(dataToExcel);
-
     setdataExportPdf(dataToExcel);
     setshowReportPdf(true);
     return;
-
+    /* 
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
@@ -719,7 +733,8 @@ export default function Home({ params }: { params: { provider: string } }) {
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const dataExcelSend = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(dataExcelSend, "ExportAll" + fileExtension);
-  }, [payload, selectedRowKeys]);
+     */
+  }, [payload, selectedRowKeys, paramsFilters]);
 
   useEffect(() => {
     getAllData();
