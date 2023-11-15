@@ -42,11 +42,17 @@ import { UsersDataFaker } from "@/services/data";
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { UsersDatabase } from "@/services/supabase/schemas/users.schema";
 type UsersDatabaseType = UsersDatabase["public"]["Tables"]["users"]["Row"];
-import dayjs from "dayjs";
 import { FilterConfirmProps } from "antd/es/table/interface";
 
 const { Paragraph } = Typography;
 const { RangePicker } = DatePicker;
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface DataType {
   _id: string;
@@ -454,12 +460,16 @@ export default function Home() {
           .gt(
             "created_at",
             dayjs(paramsFilters.from)
+              .tz("America/Chicago")
               .startOf("day")
               .format("YYYY-MM-DD 00:00:00")
           )
           .lt(
             "created_at",
-            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD 23:59:59")
+            dayjs(paramsFilters.to)
+              .tz("America/Chicago")
+              .endOf("day")
+              .format("YYYY-MM-DD 23:59:59")
           );
       }
 

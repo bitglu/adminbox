@@ -75,7 +75,7 @@ const ExportToExcel = ({ apiData, fileName }: any) => {
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { TransactionsDatabase } from "@/services/supabase/schemas/transactions.schema";
-import dayjs from "dayjs";
+
 import { FilterConfirmProps } from "antd/es/table/interface";
 import InvoiceFinance from "@/components/pdf/finances_table/InvoiceFinance";
 import { PDFViewer } from "@react-pdf/renderer";
@@ -83,6 +83,13 @@ type TransactionsDatabaseType =
   TransactionsDatabase["public"]["Tables"]["transactions"]["Row"];
 
 const { RangePicker } = DatePicker;
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const colorsTags: any = {
   Pending: "cyan",
@@ -360,7 +367,9 @@ export default function Home({ params }: { params: { transactions: string } }) {
       dataIndex: "created_at",
       key: "created_at",
       render: (text) => (
-        <Paragraph copyable>{dayjs(text).format("DD MMM hh:mm a")}</Paragraph>
+        <Typography.Paragraph copyable>
+          {dayjs(text).tz("America/Chicago").format("DD MMM hh:mm a")}
+        </Typography.Paragraph>
       ),
       filterDropdown: ({
         setSelectedKeys,
@@ -531,12 +540,16 @@ export default function Home({ params }: { params: { transactions: string } }) {
           .gt(
             "created_at",
             dayjs(paramsFilters.from)
+              .tz("America/Chicago")
               .startOf("day")
               .format("YYYY-MM-DD 00:00:00")
           )
           .lt(
             "created_at",
-            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD 23:59:59")
+            dayjs(paramsFilters.to)
+              .tz("America/Chicago")
+              .endOf("day")
+              .format("YYYY-MM-DD 23:59:59")
           );
       }
 

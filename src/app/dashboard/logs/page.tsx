@@ -42,7 +42,6 @@ import { UsersDataFaker } from "@/services/data";
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { LogsDatabase } from "@/services/supabase/schemas/logs.schema";
 type UsersDatabaseType = LogsDatabase["public"]["Tables"]["logs"]["Row"];
-import dayjs from "dayjs";
 import { FilterConfirmProps } from "antd/es/table/interface";
 
 const { Paragraph } = Typography;
@@ -62,6 +61,13 @@ const colorsTags: any = {
   Admin: "green",
   Packer: "red",
 };
+
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
   const [submittable, setSubmittable] = React.useState(false);
@@ -350,12 +356,16 @@ export default function Home() {
           .gt(
             "created_at",
             dayjs(paramsFilters.from)
+              .tz("America/Chicago")
               .startOf("day")
               .format("YYYY-MM-DD 00:00:00")
           )
           .lt(
             "created_at",
-            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD 23:59:59")
+            dayjs(paramsFilters.to)
+              .tz("America/Chicago")
+              .endOf("day")
+              .format("YYYY-MM-DD 23:59:59")
           );
       }
 

@@ -94,11 +94,17 @@ const invoiceData = {
   ],
 };
 
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 /* SUPABASE */
 import { Session, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { ProvidersDatabase } from "@/services/supabase/schemas/providers.schema";
 import { FilterConfirmProps, TableRowSelection } from "antd/es/table/interface";
-import dayjs from "dayjs";
 type ProvidersDatabaseType =
   ProvidersDatabase["public"]["Tables"]["providers"]["Row"];
 
@@ -568,6 +574,7 @@ export default function Home({ params }: { params: { provider: string } }) {
   const getAllData = useCallback(async () => {
     setLoading(true);
     try {
+      console.log("paramsFilters", paramsFilters);
       const query = supabase
         .from("providers")
         .select("*")
@@ -597,19 +604,23 @@ export default function Home({ params }: { params: { provider: string } }) {
         query.eq("id", paramsFilters.id);
       }
 
-      if (paramsFilters.from || paramsFilters.to) {
+    /*   if (paramsFilters.from || paramsFilters.to) {
         query
           .gt(
             "created_at",
             dayjs(paramsFilters.from)
+              .tz("America/Chicago")
               .startOf("day")
               .format("YYYY-MM-DD 00:00:00")
           )
           .lt(
             "created_at",
-            dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD 23:59:59")
+            dayjs(paramsFilters.to)
+              .tz("America/Chicago")
+              .endOf("day")
+              .format("YYYY-MM-DD 23:59:59")
           );
-      }
+      } */
 
       const { data: providers, error } = await query.order("id", {
         ascending: false,
@@ -658,11 +669,17 @@ export default function Home({ params }: { params: { provider: string } }) {
       query
         .gt(
           "created_at",
-          dayjs(paramsFilters.from).startOf("day").format("YYYY-MM-DD 00:00:00")
+          dayjs(paramsFilters.from)
+            .tz("America/Chicago")
+            .startOf("day")
+            .format("YYYY-MM-DD 00:00:00")
         )
         .lt(
           "created_at",
-          dayjs(paramsFilters.to).endOf("day").format("YYYY-MM-DD 23:59:59")
+          dayjs(paramsFilters.to)
+            .tz("America/Chicago")
+            .endOf("day")
+            .format("YYYY-MM-DD 23:59:59")
         );
     }
 
@@ -745,7 +762,6 @@ export default function Home({ params }: { params: { provider: string } }) {
   return (
     <main className={styles.main}>
       {contextHolder}
-
       <Card
         bordered={false}
         title={singleData?.name}
@@ -797,10 +813,11 @@ export default function Home({ params }: { params: { provider: string } }) {
             </Button>
             <DatePicker.RangePicker
               onChange={(date: any, dateString: any) => {
+                console.log(date[0].toString(), date[1].toString());
                 setParamsFilters({
                   ...paramsFilters,
-                  from: dateString[0],
-                  to: dateString[1],
+                  from: date[0],
+                  to: date[1],
                 });
               }}
             />
