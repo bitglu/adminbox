@@ -31,6 +31,7 @@ import { useState } from "react";
 import MyResponsivePie from "@/components/charts/piechart/PieChartComponent";
 import MyResponsiveBar from "@/components/charts/barchart/BarChartComponent";
 import { supabase } from "@/services/supabase/supabase";
+import Image from "next/image";
 
 const { Paragraph } = Typography;
 
@@ -66,39 +67,7 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      {/*  <div style={{ textAlign: "center", marginBottom: "3%" }}>
-        <Space size={100} align="center">
-          {STATISTIC_ITEMS.map((ele) => (
-            <Card bordered={false} key={ele.name}>
-              <Statistic
-                title={ele.name}
-                value={ele.value}
-                precision={ele.precision}
-                valueStyle={{ color: ele.color }}
-                prefix={<FontAwesomeIcon icon={ele.prefix} />}
-                suffix={ele.suffix}
-              />
-            </Card>
-          ))}
-        </Space>
-      </div> */}
-
-      {/*   <Row gutter={16} style={{ marginTop: "1%" }}>
-        <Col span={12}>
-          <Card bordered={false} title="Projects growth">
-            <div style={{ height: 400, width: "100%" }}>
-              <MyResponsivePie />
-            </div>
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card bordered={false} title="Growth Graph">
-            <div style={{ height: 400, width: "100%" }}>
-              <MyResponsiveBar />
-            </div>
-          </Card>
-        </Col>
-      </Row> */}
+      <Image src="/logo.jpeg" alt="VM" width={700} height={600} />
     </main>
   );
 }
