@@ -309,7 +309,7 @@ export default function Home() {
       key: "created_at",
       dataIndex: "created_at",
       render: (text) => (
-        <Tag color="green">{dayjs(text).format("DD MMM hh:mm a")}</Tag>
+        <Tag color="green">{dayjs(text).tz("America/Chicago").format("DD MMM hh:mm a")}</Tag>
       ),
       filterDropdown: ({
         setSelectedKeys,
