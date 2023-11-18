@@ -457,13 +457,13 @@ export default function Home() {
 
       if (paramsFilters.from || paramsFilters.to) {
         query
-          .gt(
+          .gte(
             "created_at",
             dayjs(paramsFilters.from)
               .tz("America/Chicago")
               .format("YYYY-MM-DD 00:00:00")
           )
-          .lt(
+          .lte(
             "created_at",
             dayjs(paramsFilters.to)
               .tz("America/Chicago")
