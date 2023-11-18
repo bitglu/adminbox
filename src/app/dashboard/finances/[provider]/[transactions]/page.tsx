@@ -541,14 +541,12 @@ export default function Home({ params }: { params: { transactions: string } }) {
             "created_at",
             dayjs(paramsFilters.from)
               .tz("America/Chicago")
-              .startOf("day")
               .format("YYYY-MM-DD 00:00:00")
           )
           .lt(
             "created_at",
             dayjs(paramsFilters.to)
               .tz("America/Chicago")
-              .endOf("day")
               .format("YYYY-MM-DD 23:59:59")
           );
       }
