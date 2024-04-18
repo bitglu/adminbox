@@ -692,13 +692,13 @@ export default function Home({ params }: { params: { transactions: string } }) {
               valueStyle={{ color: "#2439C4" }}
               prefix="$"
             />
-            <Statistic
+            {/* <Statistic
               title="Total Charge"
               value={Math.round(chargeAmount * 100) / 100}
               style={{ marginLeft: 10, marginRight: 10 }}
               valueStyle={{ color: "#C9348A" }}
               prefix="$"
-            />
+            /> */}
             <Statistic
               title="Total Checks"
               value={Math.round(chargeCheck * 100) / 100}
@@ -738,7 +738,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
             <Select>
               <Select.Option value="Credit">Credit</Select.Option>
               <Select.Option value="Cash">Cash</Select.Option>
-              <Select.Option value="Charge">Charge</Select.Option>
+              {/* <Select.Option value="Charge">Charge</Select.Option> */}
               <Select.Option value="Checks">Checks</Select.Option>
             </Select>
           </Form.Item>
