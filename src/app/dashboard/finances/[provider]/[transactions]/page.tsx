@@ -539,15 +539,11 @@ export default function Home({ params }: { params: { transactions: string } }) {
         query
           .gte(
             "created_at",
-            dayjs(paramsFilters.from)
-              .tz("America/Chicago")
-              .format("YYYY-MM-DD 00:00:00")
+            dayjs(paramsFilters.from).format("YYYY-MM-DD 00:00:00")
           )
           .lte(
             "created_at",
-            dayjs(paramsFilters.to)
-              .tz("America/Chicago")
-              .format("YYYY-MM-DD 23:59:59")
+            dayjs(paramsFilters.to).format("YYYY-MM-DD 23:59:59")
           );
       }
 

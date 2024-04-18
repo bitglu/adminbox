@@ -313,7 +313,9 @@ export default function Home() {
       key: "created_at",
       dataIndex: "created_at",
       render: (text) => (
-        <Tag color="green">{dayjs(text).tz("America/Chicago").format("DD MMM hh:mm a")}</Tag>
+        <Tag color="green">
+          {dayjs(text).tz("America/Chicago").format("DD MMM hh:mm a")}
+        </Tag>
       ),
       filterDropdown: ({
         setSelectedKeys,
@@ -355,15 +357,11 @@ export default function Home() {
         query
           .gte(
             "created_at",
-            dayjs(paramsFilters.from)
-              .tz("America/Chicago")
-              .format("YYYY-MM-DD 00:00:00")
+            dayjs(paramsFilters.from).format("YYYY-MM-DD 00:00:00")
           )
           .lte(
             "created_at",
-            dayjs(paramsFilters.to)
-              .tz("America/Chicago")
-              .format("YYYY-MM-DD 23:59:59")
+            dayjs(paramsFilters.to).format("YYYY-MM-DD 23:59:59")
           );
       }
 
