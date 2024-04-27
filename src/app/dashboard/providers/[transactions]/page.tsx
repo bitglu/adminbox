@@ -692,13 +692,16 @@ export default function Home({ params }: { params: { transactions: string } }) {
               valueStyle={{ color: "#2439C4" }}
               prefix="$"
             />
-            {/* <Statistic
-              title="Total Charge"
-              value={Math.round(chargeAmount * 100) / 100}
-              style={{ marginLeft: 10, marginRight: 10 }}
-              valueStyle={{ color: "#C9348A" }}
-              prefix="$"
-            /> */}
+            {params.transactions != "107" && (
+              <Statistic
+                title="Total Charge"
+                value={Math.round(chargeAmount * 100) / 100}
+                style={{ marginLeft: 10, marginRight: 10 }}
+                valueStyle={{ color: "#C9348A" }}
+                prefix="$"
+              />
+            )}
+
             <Statistic
               title="Total Checks"
               value={Math.round(chargeCheck * 100) / 100}
@@ -736,9 +739,11 @@ export default function Home({ params }: { params: { transactions: string } }) {
         >
           <Form.Item name="type" label="Type" rules={[{ required: true }]}>
             <Select>
-              <Select.Option value="Credit">Credit</Select.Option>
+              <Select.Option value="Credit">Credit Card</Select.Option>
               <Select.Option value="Cash">Cash</Select.Option>
-              {/* <Select.Option value="Charge">Charge</Select.Option> */}
+              {params.transactions != "107" && (
+                <Select.Option value="Charge">Charge</Select.Option>
+              )}
               <Select.Option value="Checks">Checks</Select.Option>
             </Select>
           </Form.Item>

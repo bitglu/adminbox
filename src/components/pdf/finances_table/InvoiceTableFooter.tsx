@@ -84,7 +84,7 @@ const InvoiceTableFooter = ({ items, module }: any) => {
   return (
     <>
       <View style={styles.row}>
-        <Text style={styles.description}>Credit</Text>
+        <Text style={styles.description}>Credit Card</Text>
         <Text style={styles.total}>{Number.parseFloat(credit).toFixed(2)}</Text>
       </View>
 

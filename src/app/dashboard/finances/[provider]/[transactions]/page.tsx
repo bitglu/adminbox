@@ -734,7 +734,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
         >
           <Form.Item name="type" label="Type" rules={[{ required: true }]}>
             <Select>
-              <Select.Option value="Credit">Credit</Select.Option>
+              <Select.Option value="Credit">Credit Card</Select.Option>
               <Select.Option value="Cash">Cash</Select.Option>
               {/* <Select.Option value="Charge">Charge</Select.Option> */}
               <Select.Option value="Checks">Checks</Select.Option>
