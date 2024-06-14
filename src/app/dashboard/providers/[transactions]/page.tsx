@@ -472,7 +472,11 @@ export default function Home({ params }: { params: { transactions: string } }) {
       } else {
         const { data: transaction, error } = await supabase
           .from("transactions")
-          .insert({ ...values, provider_id: params.transactions, created_at: new Date() })
+          .insert({
+            ...values,
+            provider_id: params.transactions,
+            created_at: new Date(),
+          })
           .select()
           .single();
 
@@ -539,11 +543,15 @@ export default function Home({ params }: { params: { transactions: string } }) {
         query
           .gte(
             "created_at",
-            dayjs(paramsFilters.from).format("YYYY-MM-DD 00:00:00")
+            dayjs(paramsFilters.from)
+              .tz("America/Chicago")
+              .format("YYYY-MM-DD 00:00:00")
           )
           .lte(
             "created_at",
-            dayjs(paramsFilters.to).format("YYYY-MM-DD 23:59:59")
+            dayjs(paramsFilters.to)
+              .tz("America/Chicago")
+              .format("YYYY-MM-DD 23:59:59")
           );
       }
 
