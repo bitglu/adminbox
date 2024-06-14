@@ -365,7 +365,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
       key: "created_at",
       render: (text) => (
         <Typography.Paragraph copyable>
-          {dayjs(text).format("DD MMM hh:mm a")}
+          {dayjs(text).tz("America/Chicago").format("DD MMM hh:mm a")}
         </Typography.Paragraph>
       ),
       filterDropdown: ({
@@ -472,7 +472,11 @@ export default function Home({ params }: { params: { transactions: string } }) {
       } else {
         const { data: transaction, error } = await supabase
           .from("transactions")
-          .insert({ ...values, provider_id: params.transactions, created_at: new Date() })
+          .insert({
+            ...values,
+            provider_id: params.transactions,
+            created_at: new Date(),
+          })
           .select()
           .single();
 
@@ -536,6 +540,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
       }
 
       if (paramsFilters.from || paramsFilters.to) {
+        console.log(paramsFilters.from, paramsFilters.to);
         query
           .gte(
             "created_at",
