@@ -390,7 +390,7 @@ export default function Home() {
       } else {
         const { data: provider, error } = await supabase
           .from("providers")
-          .insert({ ...values, type: "general" })
+          .insert({ ...values, type: "general", created_at: new Date() })
           .select()
           .single();
 
@@ -415,7 +415,7 @@ export default function Home() {
     try {
       const { data: user, error } = await supabase
         .from("logs")
-        .insert({ user_id: 1, ...values })
+        .insert({ user_id: 1, ...values, created_at: new Date() })
         .select()
         .single();
     } catch (error) {

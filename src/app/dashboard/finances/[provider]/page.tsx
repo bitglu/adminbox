@@ -534,6 +534,8 @@ export default function Home({ params }: { params: { provider: string } }) {
             ...values,
             type: "sub_finances",
             provider_id: params.provider,
+            created_at: new Date()
+            
           })
           .select()
           .single();
@@ -559,7 +561,7 @@ export default function Home({ params }: { params: { provider: string } }) {
     try {
       const { data: user, error } = await supabase
         .from("logs")
-        .insert({ user_id: 1, ...values })
+        .insert({ user_id: 1, ...values, created_at: new Date() })
         .select()
         .single();
     } catch (error) {

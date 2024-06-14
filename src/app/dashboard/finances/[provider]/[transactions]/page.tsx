@@ -474,7 +474,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
       } else {
         const { data: transaction, error } = await supabase
           .from("transactions")
-          .insert({ ...values, provider_id: params.transactions })
+          .insert({ ...values, provider_id: params.transactions, created_at: new Date() })
           .select()
           .single();
 
@@ -499,7 +499,7 @@ export default function Home({ params }: { params: { transactions: string } }) {
     try {
       const { data: user, error } = await supabase
         .from("logs")
-        .insert({ user_id: 1, ...values })
+        .insert({ user_id: 1, ...values, created_at: new Date() })
         .select()
         .single();
     } catch (error) {
